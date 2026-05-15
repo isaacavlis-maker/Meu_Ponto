@@ -1,342 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Timesheet Pro Isaque - Platinum V22</title>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+        doc.setFillColor(255, 255, 255); doc.rect(0, 0, 105, 60, 'F');
 
-    <style>
-        :root { 
-            --p: #6366f1; 
-            --ot: #fbbf24; 
-            --bg: #0f172a; 
-            --card: #1e293b;
-            --text: #f8fafc;
-            --accent: #818cf8;
-        }
-        
-        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-        
-        body { 
-            background: var(--bg); 
-            color: var(--text); 
-            padding-bottom: 50px; 
-            background-image: radial-gradient(circle at top right, #1e1b4b, transparent), radial-gradient(circle at bottom left, #1e1b4b, transparent);
-            min-height: 100vh;
-        }
+        // Título e Info (Lado Escuro)
+        doc.setTextColor(255, 255, 255); doc.setFontSize(26); doc.setFont(undefined, 'bold');
+        doc.text("INVOICE", 120, 25);
+        doc.setFontSize(10); doc.setFont(undefined, 'normal');
+        doc.text(`Nº: ${Date.now().toString().slice(-5)}`, 120, 35);
+        doc.text(`Data: ${new Date().toLocaleDateString()}`, 120, 42);
 
-        #splash { 
-            position:fixed; top:0; left:0; width:100%; height:100%; 
-            background: var(--bg); 
-            display:flex; align-items:center; justify-content:center; 
-            z-index:9999; flex-direction:column; 
-        }
-        .c-splash { 
-            background: rgba(255,255,255,0.03); 
-            backdrop-filter: blur(15px); 
-            padding:40px; border-radius:30px; 
-            text-align:center; width:85%; max-width:400px; 
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-        }
+        // TO / FROM
+        doc.setTextColor(30, 41, 59); doc.setFontSize(11); doc.setFont(undefined, 'bold');
+        doc.text("INVOICE TO (CLIENTE):", 15, 75);
+        doc.setFont(undefined, 'normal'); doc.text(`${c}
+${aC}`, 15, 82);
 
-        header { 
-            padding:30px 20px; text-align: center;
-        }
-        header h1 { font-size: 1.5rem; letter-spacing: 2px; color: var(--accent); text-shadow: 0 0 10px rgba(129, 140, 248, 0.5); }
-        
-        .card { 
-            background: var(--card); 
-            border-radius:24px; padding:24px; 
-            margin: 0 15px 20px 15px;
-            border: 1px solid rgba(255,255,255,0.05);
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
-        }
+        doc.setFont(undefined, 'bold'); doc.text("FROM (EMISSOR):", 120, 75);
+        doc.setFont(undefined, 'normal'); doc.text(`${n}
+${aM}`, 120, 82);
 
-        .grid { display:grid; grid-template-columns: 1fr 1fr; gap:15px; }
-        .full { grid-column: span 2; }
-
-        label { font-size: 0.7rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; display: block; letter-spacing: 1px; }
-        
-        input, select, textarea { 
-            width:100%; padding:14px; 
-            border:1px solid rgba(255,255,255,0.1); 
-            border-radius:14px; 
-            background: rgba(15, 23, 42, 0.6); 
-            color: white; font-size:1rem; outline: none; transition: 0.3s;
-        }
-        input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.2); }
-
-        /* Estilo Botões 3D Futuristas */
-        .btn-3d {
-            background: linear-gradient(180deg, var(--accent) 0%, var(--p) 100%);
-            color: white; border: none; padding: 16px; border-radius: 16px;
-            font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
-            box-shadow: 0 6px 0 #3730a3, 0 12px 20px rgba(0,0,0,0.4);
-            transition: all 0.1s active;
-            width: 100%;
-        }
-        .btn-3d:active {
-            box-shadow: 0 2px 0 #3730a3, 0 4px 10px rgba(0,0,0,0.4);
-            transform: translateY(4px);
-        }
-
-        .tabs { display:flex; gap:10px; padding:0 15px; margin-bottom:20px; }
-        .t-btn { 
-            flex:1; padding:14px; border:none; border-radius:15px; 
-            background: rgba(255,255,255,0.05); color: #94a3b8; 
-            font-weight:700; cursor:pointer; transition: 0.3s;
-        }
-        .t-btn.active { background: var(--card); color: var(--accent); border: 1px solid rgba(129, 140, 248, 0.3); }
-
-        .kpi-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 15px; margin-bottom: 20px; }
-        .kpi-card { 
-            background: var(--card); padding: 20px; border-radius: 24px; 
-            text-align: center; border-bottom: 4px solid var(--p);
-        }
-        .kpi-val { font-size: 1.5rem; font-weight: 800; margin-top: 5px; color: var(--accent); }
-
-        table { width:100%; border-collapse:collapse; }
-        td { padding:15px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size:0.9rem; }
-
-        #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; padding:20px; }
-        .m-content { background: var(--card); border-radius:30px; padding:30px; max-width:500px; margin:auto; border: 1px solid rgba(255,255,255,0.1); }
-        
-        .powered { text-align: center; font-size: 10px; color: #64748b; margin-top: 30px; font-weight: 900; letter-spacing: 2px; }
-    </style>
-</head>
-<body>
-
-<div id="splash">
-    <div class="c-splash">
-        <h1 style="color:var(--accent); margin-bottom:10px;">PLATINUM V22</h1>
-        <p style="font-size:0.8rem; margin-bottom:30px; opacity:0.6;">SISTEMA INTELIGENTE DE INVOICE</p>
-        <select id="langSet" style="margin-bottom:20px;">
-            <option value="pt">PORTUGUÊS (BR)</option>
-            <option value="en">ENGLISH (US)</option>
-            <option value="es">ESPAÑOL (ES)</option>
-        </select>
-        <button class="btn-3d" onclick="iniciar()">ACESSAR SISTEMA</button>
-        <div class="powered">ISAQUEAVLIS TECH</div>
-    </div>
-</div>
-
-<div id="app" style="display:none;">
-    <header>
-        <h1 id="txt-title">TIME TRACKER</h1>
-        <div style="display:flex; justify-content: center; gap: 10px; margin-top: 10px;">
-             <button onclick="toggleModal(true)" style="background:none; border: 1px solid #475569; color: #94a3b8; padding: 5px 15px; border-radius: 20px; font-size: 12px;">CONFIGURAÇÕES ⚙️</button>
-             <button onclick="clearAll()" style="background:none; border: 1px solid #ef4444; color: #ef4444; padding: 5px 15px; border-radius: 20px; font-size: 12px;">LIMPAR TUDO 🗑️</button>
-        </div>
-    </header>
-
-    <div class="tabs">
-        <button id="b-l" class="t-btn active" onclick="nav('lancar')">REGISTRO</button>
-        <button id="b-r" class="t-btn" onclick="nav('resumo')">RELATÓRIO</button>
-    </div>
-
-    <div id="p-lancar" class="section">
-        <div class="card">
-            <div class="grid">
-                <div class="full"><label>DATA DO TRABALHO</label><input type="date" id="data"></div>
-                <div><label>ENTRADA</label><input type="time" id="t1"></div>
-                <div><label>SAÍDA</label><input type="time" id="t2"></div>
-                <div><label>ALMOÇO IN</label><input type="time" id="l1"></div>
-                <div><label>ALMOÇO OUT</label><input type="time" id="l2"></div>
-            </div>
-            <button class="btn-3d" style="margin-top:25px;" onclick="salvar()">SALVAR REGISTRO</button>
-        </div>
-
-        <div class="card" style="padding:10px;">
-            <table id="tabela"></table>
-        </div>
-    </div>
-
-    <div id="p-resumo" class="section" style="display:none;">
-        <div class="kpi-container">
-            <div class="kpi-card"><label>TOTAL HORAS</label><div id="sum-h" class="kpi-val">0h</div></div>
-            <div class="kpi-card" style="border-bottom-color: var(--ot);"><label>OVERTIME</label><div id="sum-ot" class="kpi-val" style="color:var(--ot)">0h</div></div>
-        </div>
-        
-        <div class="card" style="text-align:center; border-bottom: 4px solid #10b981;">
-            <label>VALOR TOTAL A RECEBER</label>
-            <div id="sum-pay" class="kpi-val" style="color:#10b981; font-size: 2.5rem;">$ 0.00</div>
-        </div>
-
-        <div class="card" id="monthly-stats" style="font-size: 0.8rem; line-height: 2;">
-            <!-- Aqui entram os cálculos automáticos -->
-        </div>
-
-        <div class="grid" style="padding: 0 15px;">
-            <button class="btn-3d" style="background: #10b981; box-shadow: 0 6px 0 #065f46;" onclick="exportarExcel()">PLANILHA EXCEL</button>
-            <button class="btn-3d" style="background: #ef4444; box-shadow: 0 6px 0 #991b1b;" onclick="pdf()">GERAR INVOICE PDF</button>
-        </div>
-    </div>
-
-    <div class="powered">DEVELOPED & POWERED BY ISAQUEAVLIS</div>
-</div>
-
-<div id="modal">
-    <div class="m-content">
-        <label>SEU NOME</label><input type="text" id="uN" placeholder="Ex: Isaque Silva">
-        <label>SUA EMPRESA</label><input type="text" id="uC">
-        <label>VALOR HORA ($)</label><input type="number" id="uR">
-        <label>LOGO URL (OU BASE64)</label><input type="text" id="uLogo" placeholder="Link da imagem">
-        <div class="grid" style="margin-top:15px;">
-             <button class="btn-3d" onclick="toggleModal(false)">SALVAR</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    let db = JSON.parse(localStorage.getItem('isq_db_v22')) || [];
-    let lang = 'pt';
-
-    const t = {
-        pt: { title: "CONTROLE DE PONTO", reg: "REGISTRO", rep: "RELATÓRIO" },
-        en: { title: "TIME TRACKER", reg: "ENTRY", rep: "REPORT" },
-        es: { title: "CONTROL DE HORAS", reg: "REGISTRO", rep: "REPORTE" }
-    };
-
-    function iniciar() {
-        lang = document.getElementById('langSet').value;
-        document.getElementById('txt-title').innerText = t[lang].title;
-        document.getElementById('b-l').innerText = t[lang].reg;
-        document.getElementById('b-r').innerText = t[lang].rep;
-        
-        document.getElementById('splash').style.display = 'none';
-        document.getElementById('app').style.display = 'block';
-        
-        // Carregar config
-        document.getElementById('uN').value = localStorage.getItem('uN') || '';
-        document.getElementById('uC').value = localStorage.getItem('uC') || '';
-        document.getElementById('uR').value = localStorage.getItem('uR') || '';
-        document.getElementById('uLogo').value = localStorage.getItem('uLogo') || '';
-        
-        render();
-    }
-
-    function toggleModal(s) {
-        document.getElementById('modal').style.display = s ? 'flex' : 'none';
-        if(!s) {
-            localStorage.setItem('uN', document.getElementById('uN').value);
-            localStorage.setItem('uC', document.getElementById('uC').value);
-            localStorage.setItem('uR', document.getElementById('uR').value);
-            localStorage.setItem('uLogo', document.getElementById('uLogo').value);
-        }
-    }
-
-    function nav(p) {
-        document.getElementById('p-lancar').style.display = p === 'lancar' ? 'block' : 'none';
-        document.getElementById('p-resumo').style.display = p === 'resumo' ? 'block' : 'none';
-        document.getElementById('b-l').className = p === 'lancar' ? 't-btn active' : 't-btn';
-        document.getElementById('b-r').className = p === 'resumo' ? 't-btn active' : 't-btn';
-        if(p === 'resumo') calc();
-    }
-
-    const parseM = (time) => { if(!time) return 0; const [h, m] = time.split(':'); return parseInt(h)*60 + parseInt(m); };
-    const formatM = (min) => `${Math.floor(min/60)}h ${min%60}m`;
-
-    function salvar() {
-        const d = document.getElementById('data').value;
-        const rate = parseFloat(document.getElementById('uR').value) || 0;
-        if(!d) return alert("Selecione a data!");
-
-        let total = parseM(document.getElementById('t2').value) - parseM(document.getElementById('t1').value);
-        let lunch = parseM(document.getElementById('l2').value) - parseM(document.getElementById('l1').value);
-        let real = total - lunch;
-        
-        if(real <= 0) return alert("Horário inválido!");
-
-        // 8h = 480 min
-        let ot = Math.max(0, real - 480);
-        let obj = { d, m: real, ot, g: (real/60) * rate };
-        
-        db = db.filter(x => x.d !== d);
-        db.push(obj);
-        localStorage.setItem('isq_db_v22', JSON.stringify(db));
-        render();
-        alert("Salvo com sucesso!");
-    }
-
-    function render() {
-        let h = '';
-        db.sort((a,b) => b.d.localeCompare(a.d)).forEach(x => {
-            h += `<tr><td>${x.d.split('-').reverse().join('/')}</td><td style="color:var(--accent); font-weight:bold;">${formatM(x.m)}</td><td>$${x.g.toFixed(2)}</td><td onclick="del('${x.d}')">❌</td></tr>`;
+        // Tabela
+        doc.autoTable({
+            startY: 100,
+            head: [['DATA', 'HORAS', 'OVERTIME', 'VALOR ($)']],
+            body: db.sort((a,b)=>a.d.localeCompare(b.d)).map(x => [x.d, formatM(x.m), formatM(x.ot), x.g.toFixed(2)]),
+            theme: 'striped',
+            headStyles: { fillColor: [30, 41, 59] }
         });
-        document.getElementById('tabela').innerHTML = h;
-    }
 
-    function del(d) { db = db.filter(x => x.d !== d); localStorage.setItem('isq_db_v22', JSON.stringify(db)); render(); }
-    function clearAll() { if(confirm("Apagar TUDO?")) { db = []; localStorage.clear(); location.reload(); } }
+        const finalY = doc.lastAutoTable.finalY + 15;
+        doc.setFontSize(14); doc.setFont(undefined, 'bold');
+        doc.text(`TOTAL DUE: $ ${total.toFixed(2)}`, 140, finalY);
 
-    function calc() {
-        let th = db.reduce((a,b) => a + b.m, 0);
-        let totOt = db.reduce((a,b) => a + b.ot, 0);
-        let pay = db.reduce((a,b) => a + b.g, 0);
-        
-        document.getElementById('sum-h').innerText = formatM(th);
-        document.getElementById('sum-ot').innerText = formatM(totOt);
-        document.getElementById('sum-pay').innerText = `$ ${pay.toFixed(2)}`;
-        
-        // Stats
-        let days = db.length;
-        document.getElementById('monthly-stats').innerHTML = `
-            <b>RESUMO DETALHADO:</b><br>
-            📅 Dias Trabalhados: ${days}<br>
-            ⏱️ Média Diária: ${days ? formatM(th/days) : 0}<br>
-            💰 Valor p/ Hora: $${document.getElementById('uR').value}<br>
-            🚀 Overtime Total: ${formatM(totOt)}
-        `;
+        doc.setFontSize(8); doc.setTextColor(150);
+        doc.text("DEVELOPED & POWERED BY ISAQUEAVLIS", 75, 285);
+        doc.save(`Invoice_${n}.pdf`);
     }
 
     function exportarExcel() {
         const ws = XLSX.utils.json_to_sheet(db);
         const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Relatorio");
-        XLSX.writeFile(wb, "Timesheet_Isaque_V22.xlsx");
-    }
-
-    function pdf() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const n = document.getElementById('uN').value;
-        const c = document.getElementById('uC').value;
-        const total = db.reduce((a,b) => a + b.g, 0);
-
-        // Design Futurista PDF
-        doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 50, 'F');
-        doc.setTextColor(129, 140, 248); doc.setFontSize(24); doc.text("INVOICE PLATINUM", 15, 25);
-        doc.setFontSize(10); doc.setTextColor(255,255,255); doc.text(`ISAQUE TECH SYSTEM - V22`, 15, 35);
-        
-        // Seção TO/FROM
-        doc.setTextColor(30, 41, 59); doc.setFontSize(12); doc.setFont(undefined, 'bold');
-        doc.text("EMISSOR (FROM):", 15, 65);
-        doc.setFont(undefined, 'normal'); doc.text(n || "Isaque User", 15, 72);
-        
-        doc.setFont(undefined, 'bold'); doc.text("CLIENTE (TO):", 120, 65);
-        doc.setFont(undefined, 'normal'); doc.text(c || "Client Company", 120, 72);
-
-        // Tabela
-        doc.autoTable({
-            startY: 85,
-            head: [['DATA', 'HORAS REAIS', 'OVERTIME', 'TOTAL ($)']],
-            body: db.sort((a,b)=>a.d.localeCompare(b.d)).map(x => [x.d, formatM(x.m), formatM(x.ot), x.g.toFixed(2)]),
-            theme: 'grid',
-            headStyles: { fillColor: [99, 102, 241] }
-        });
-
-        const finalY = doc.lastAutoTable.finalY + 15;
-        doc.setFontSize(16); doc.setFont(undefined, 'bold');
-        doc.text(`TOTAL FINAL: $ ${total.toFixed(2)}`, 140, finalY);
-        
-        doc.setFontSize(8); doc.setTextColor(150);
-        doc.text("Developed & Powered by Isaqueavlis", 75, 285);
-
-        doc.save("Invoice_Isaque_Platinum.pdf");
+        XLSX.writeFile(wb, "Timesheet_Isaque_V23.xlsx");
     }
 </script>
 </body>
