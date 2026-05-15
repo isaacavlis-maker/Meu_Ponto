@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Timesheet Pro Isaque Platinum</title>
+    <title>Timesheet Pro Isaque Platinum V11</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -54,7 +54,7 @@
 
 <div id="splash">
     <div class="c-splash">
-        <img src="icon.png" style="width:90px; border-radius:20px; margin-bottom:20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3);" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2088/2088617.png'">
+        <img id="splash-icon" src="icon.png" style="width:90px; border-radius:20px; margin-bottom:20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3);" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2088/2088617.png'">
         <h2 style="margin-bottom:10px;">Timesheet Pro</h2>
         <p style="font-size:0.8rem; opacity:0.7; margin-bottom:20px;">Select Language / Selecione o Idioma</p>
         <select id="langSet" style="margin-bottom:20px; color: black;">
@@ -128,7 +128,7 @@
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('db_isaque_v10')) || [];
+    let db = JSON.parse(localStorage.getItem('db_isaque_v11')) || [];
     let idioma = 'en';
 
     const trad = {
@@ -196,7 +196,7 @@
 
         let obj = { id: Date.now(), d, m: total, ot: Math.max(0, total-480), g: (total/60)*r };
         db = db.filter(x => x.d !== d); db.push(obj);
-        localStorage.setItem('db_isaque_v10', JSON.stringify(db));
+        localStorage.setItem('db_isaque_v11', JSON.stringify(db));
         localStorage.setItem('u_n', document.getElementById('uN').value);
         localStorage.setItem('u_c', document.getElementById('uC').value);
         localStorage.setItem('u_r', r);
@@ -214,7 +214,7 @@
     function apagarRegistro(id) { 
         if(confirm("Delete?")) {
             db = db.filter(x=>x.id!==id); 
-            localStorage.setItem('db_isaque_v10', JSON.stringify(db)); 
+            localStorage.setItem('db_isaque_v11', JSON.stringify(db)); 
             desenharTabela(); 
         }
     }
@@ -231,19 +231,80 @@
     }
 
     function exportarPDF() {
-        const { jsPDF } = window.jspdf; let doc = new jsPDF();
+        const { jsPDF } = window.jspdf; 
+        const doc = new jsPDF();
         const nome = document.getElementById('uN').value || "N/A";
         const emp = document.getElementById('uC').value || "N/A";
-        
-        doc.setFillColor(30, 41, 59); doc.rect(0, 0, 210, 40, 'F');
-        doc.setTextColor(255, 255, 255); doc.setFontSize(20); doc.text("WORK INVOICE / TIMESHEET", 14, 22);
-        doc.setFontSize(10); doc.text(`Worker: ${nome} | Company: ${emp} | Date: ${new Date().toLocaleDateString()}`, 14, 32);
-
-        const rows = db.sort((a,b)=>a.d.localeCompare(b.d)).map(x=>[x.d, mToH(x.m), mToH(x.ot), "$"+x.g.toFixed(2)]);
-        doc.autoTable({ head: [['Date', 'Total', 'Overtime', 'Pay']], body: rows, startY: 50, theme: 'striped', headStyles: {fillColor: [79, 70, 229]} });
-        
         const totalG = db.reduce((a,b)=> a+b.g, 0);
-        doc.setTextColor(15, 23, 42); doc.text(`TOTAL EARNINGS: US$ ${totalG.toFixed(2)}`, 14, doc.lastAutoTable.finalY + 15);
+
+        // Header Background Profissional
+        doc.setFillColor(30, 41, 59); doc.rect(0, 0, 210, 60, 'F');
+        
+        // Ícone no PDF
+        const iconImg = document.getElementById('splash-icon');
+        if (iconImg && iconImg.src.startsWith('data:')) {
+            doc.addImage(iconImg.src, 'PNG', 160, 10, 35, 35);
+        }
+
+        // Título Invoice
+        doc.setTextColor(255, 255, 255); doc.setFontSize(28); doc.text("INVOICE", 14, 25);
+        
+        doc.setFontSize(10); 
+        doc.text(`Invoice No: ${Date.now().toString().slice(-6)}`, 14, 35);
+        doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 40);
+
+        // Seção TO / FROM
+        doc.setFillColor(248, 250, 252); doc.rect(0, 60, 210, 40, 'F');
+        doc.setTextColor(30, 41, 59);
+        doc.setFontSize(12); doc.setFont(undefined, 'bold');
+        doc.text("INVOICE TO:", 14, 75);
+        doc.setFont(undefined, 'normal');
+        doc.text(`${emp}`, 14, 82);
+        
+        doc.setFont(undefined, 'bold');
+        doc.text("FROM:", 120, 75);
+        doc.setFont(undefined, 'normal');
+        doc.text(`${nome}`, 120, 82);
+
+        // Caixa de Total Due (Destaque)
+        doc.setFillColor(226, 232, 240); doc.rect(14, 90, 70, 10, 'F');
+        doc.setFont(undefined, 'bold');
+        doc.text(`TOTAL DUE: US$ ${totalG.toFixed(2)}`, 18, 97);
+
+        // Tabela Principal Centralizada
+        const rows = db.sort((a,b)=>a.d.localeCompare(b.d)).map(x=>[
+            x.d.split('-').reverse().join('/'), 
+            mToH(x.m), 
+            mToH(x.ot), 
+            "$ "+x.g.toFixed(2)
+        ]);
+        
+        doc.autoTable({ 
+            head: [['Date', 'Hours', 'Overtime', 'Amount']], 
+            body: rows, 
+            startY: 110, 
+            theme: 'striped', 
+            headStyles: {fillColor: [30, 41, 59], textColor: [255, 255, 255], halign: 'center'},
+            columnStyles: { 0: {halign: 'left'}, 1: {halign: 'center'}, 2: {halign: 'center'}, 3: {halign: 'right'} },
+            styles: { fontSize: 10, cellPadding: 5 }
+        });
+        
+        // Sumário Final
+        const finalY = doc.lastAutoTable.finalY + 10;
+        doc.setFontSize(10); doc.setFont(undefined, 'normal');
+        doc.text("Summary:", 140, finalY + 10);
+        doc.text(`Sub Total:`, 140, finalY + 18); doc.text(`$ ${totalG.toFixed(2)}`, 193, finalY + 18, {align: 'right'});
+        
+        doc.setFillColor(30, 41, 59); doc.rect(140, finalY + 22, 55, 10, 'F');
+        doc.setTextColor(255, 255, 255); doc.setFont(undefined, 'bold');
+        doc.text(`GRAND TOTAL:`, 142, finalY + 28); doc.text(`$ ${totalG.toFixed(2)}`, 193, finalY + 28, {align: 'right'});
+
+        // Área de Assinatura
+        doc.setTextColor(30, 41, 59);
+        doc.setDrawColor(200, 200, 200); doc.line(14, finalY + 50, 70, finalY + 50);
+        doc.setFontSize(8); doc.text(nome, 14, finalY + 55);
+        doc.text("Accounting Manager", 14, finalY + 59);
+
         doc.save(`Invoice_${nome}.pdf`);
     }
 
@@ -254,7 +315,6 @@
         document.getElementById('uR').value = localStorage.getItem('u_r') || '';
         setInterval(()=> { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }, 1000);
         
-        // Navegação por Enter
         const ins = document.querySelectorAll('.nav-in');
         ins.forEach((input, i) => {
             input.addEventListener('keydown', (e) => {
