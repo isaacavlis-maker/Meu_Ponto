@@ -3,67 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Timesheet Pro Isaque V12</title>
+    <title>Timesheet Pro Isaque V13</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        :root { --p: #4f46e5; --ot: #f59e0b; --bg: #0f172a; --text: #1e293b; --success: #10b981; }
+        :root { --p: #1e293b; --accent: #4f46e5; --ot: #f59e0b; --bg: #f1f5f9; --text: #1e293b; --success: #10b981; }
         * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, system-ui, sans-serif; }
         
-        body { background:#f1f5f9; color: var(--text); padding-bottom: 50px; }
-        #app-content { padding: 15px; }
-
-        header { background:#1e293b; color:white; padding:20px; border-radius:20px; margin-bottom:20px; display:flex; justify-content:space-between; align-items: center; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        .card { background:white; border-radius:20px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,0.05); margin-bottom:15px; border: 1px solid #e2e8f0; }
-        .card-title { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 15px; display: block; }
-
+        body { background: var(--bg); color: var(--text); padding-bottom: 50px; }
+        
+        #splash { position:fixed; top:0; left:0; width:100%; height:100%; background: #1e293b; display:flex; align-items:center; justify-content:center; z-index:9999; color:white; flex-direction:column; }
+        
+        header { background:#1e293b; color:white; padding:20px; border-radius:0 0 20px 20px; margin-bottom:20px; display:flex; justify-content:space-between; align-items: center; }
+        .card { background:white; border-radius:20px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,0.05); margin-bottom:15px; }
         .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
         .full { grid-column: span 2; }
 
         label { font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; display: block; }
-        input, select, textarea { width:100%; padding:12px; border:2px solid #f1f5f9; border-radius:12px; background:#f8fafc; font-size:1rem; outline: none; transition: 0.2s; }
-        input:focus { border-color: var(--p); background: white; }
+        input, select, textarea { width:100%; padding:12px; border:2px solid #e2e8f0; border-radius:12px; font-size:1rem; outline: none; }
+        input:focus { border-color: var(--accent); }
 
         .tabs { display:flex; gap:8px; background:#e2e8f0; padding:5px; border-radius:15px; margin-bottom:20px; }
-        .t-btn { flex:1; padding:12px; border:none; border-radius:10px; background:transparent; font-weight:bold; color: #64748b; cursor:pointer; }
-        .t-btn.active { background:white; color:var(--p); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .t-btn { flex:1; padding:12px; border:none; border-radius:10px; background:transparent; font-weight:bold; color: #64748b; }
+        .t-btn.active { background:white; color:var(--accent); }
 
         .panel { display:none; } .panel.active { display:block; }
-
-        button.btn-main { background:var(--p); color:white; border:none; padding:15px; border-radius:12px; width:100%; font-weight:bold; cursor:pointer; transition: 0.2s; }
-        button.btn-main:active { transform: scale(0.98); }
-
-        /* Modal Settings */
-        #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; padding:20px; overflow-y:auto; }
+        button.btn-main { background:var(--accent); color:white; border:none; padding:15px; border-radius:12px; width:100%; font-weight:bold; cursor:pointer; }
+        
+        #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; padding:20px; overflow-y:auto; }
         .modal-content { background:white; border-radius:25px; padding:25px; max-width:500px; margin:auto; }
 
-        .kpi-box { padding: 20px; border-radius: 15px; border-left: 5px solid var(--p); background: #f8fafc; }
-        .val { font-size: 1.8rem; font-weight: 900; margin-top: 5px; }
-
+        .powered-by { text-align:center; font-size:9px; color:#94a3b8; margin-top:15px; font-weight:bold; text-transform:uppercase; letter-spacing:1px; }
+        .settings-btn { background:rgba(255,255,255,0.1); border:none; color:white; padding:10px; border-radius:12px; }
+        
         table { width:100%; border-collapse:collapse; }
-        th { text-align:left; padding:12px; font-size:0.65rem; color:#94a3b8; border-bottom: 2px solid #f1f5f9; }
-        td { padding:12px; border-bottom: 1px solid #f1f5f9; font-size:0.85rem; }
-
-        .settings-btn { background:rgba(255,255,255,0.1); border:none; color:white; padding:10px; border-radius:12px; cursor:pointer; font-size:1.2rem; }
+        th { text-align:left; padding:10px; font-size:0.65rem; color:#94a3b8; border-bottom: 2px solid #f1f5f9; }
+        td { padding:10px; border-bottom: 1px solid #f1f5f9; font-size:0.85rem; }
     </style>
 </head>
 <body>
 
-<div id="app-content">
+<div id="splash">
+    <img src="icon.png" style="width:80px; border-radius:15px; margin-bottom:20px;" onerror="this.style.display='none'">
+    <select id="langSet" style="width:200px; margin-bottom:15px;">
+        <option value="en">English (US)</option>
+        <option value="pt">Português (BR)</option>
+        <option value="es">Español (ES)</option>
+    </select>
+    <button class="btn-main" style="width:200px" onclick="iniciarApp()">START</button>
+    <div class="powered-by" style="color:white; opacity:0.5; margin-top:40px;">Developed & Powered By : Isaqueavlis</div>
+</div>
+
+<div id="app-content" style="display:none; padding:15px;">
     <header>
-        <div><b>Time Tracker</b><br><small>Isaque Platinum V12</small></div>
+        <div><b>Time Tracker</b><br><small>Platinum V13</small></div>
         <button class="settings-btn" onclick="toggleModal(true)">⚙️</button>
     </header>
 
     <div class="card">
-        <span class="card-title">Main Info</span>
         <div class="grid">
-            <div class="full"><label>Your Name</label><input type="text" id="uN" oninput="saveConfig()"></div>
-            <div><label>Company</label><input type="text" id="uC" oninput="saveConfig()"></div>
-            <div><label>Rate (US$)</label><input type="number" id="uR" oninput="saveConfig()"></div>
+            <div class="full"><label>Name</label><input type="text" id="uN" class="nav-f"></div>
+            <div><label>Company</label><input type="text" id="uC" class="nav-f"></div>
+            <div><label>Rate ($)</label><input type="number" id="uR" class="nav-f"></div>
         </div>
     </div>
 
@@ -74,17 +78,15 @@
 
     <div id="p-lancar" class="panel active">
         <div class="card">
-            <span class="card-title">New Shift</span>
             <div class="grid">
-                <div class="full"><label>Date</label><input type="date" id="data"></div>
-                <div><label>IN</label><input type="time" id="t1"></div>
-                <div><label>OUT</label><input type="time" id="t2"></div>
-                <div><label>LUNCH IN</label><input type="time" id="l1"></div>
-                <div><label>LUNCH OUT</label><input type="time" id="l2"></div>
+                <div class="full"><label>Date</label><input type="date" id="data" class="nav-f"></div>
+                <div><label>IN</label><input type="time" id="t1" class="nav-f"></div>
+                <div><label>LUNCH IN</label><input type="time" id="l1" class="nav-f"></div>
+                <div><label>LUNCH OUT</label><input type="time" id="l2" class="nav-f"></div>
+                <div><label>OUT</label><input type="time" id="t2" class="nav-f"></div>
             </div>
-            <button class="btn-main" style="margin-top:20px;" onclick="salvarPonto()">SAVE ENTRY</button>
+            <button class="btn-main" style="margin-top:20px;" onclick="salvarPonto()">SAVE</button>
         </div>
-
         <div class="card" style="overflow-x:auto;">
             <table>
                 <thead><tr><th>Date</th><th>Total</th><th>Pay</th><th></th></tr></thead>
@@ -95,167 +97,148 @@
 
     <div id="p-resumo" class="panel">
         <div class="grid">
-            <div class="kpi-box"><label>Month Total</label><div id="vTotal" class="val">00:00</div></div>
-            <div class="kpi-box" style="border-left-color: var(--ot);"><label>Overtime</label><div id="vOT" class="val" style="color:var(--ot)">00:00</div></div>
+            <div class="card" style="margin:0;"><label>TOTAL HRS</label><h2 id="vTotal">00:00</h2></div>
+            <div class="card" style="margin:0; border-left:4px solid var(--ot);"><label>OVERTIME</label><h2 id="vOT" style="color:var(--ot)">00:00</h2></div>
         </div>
-        <div class="card" style="margin-top:15px; border-left: 5px solid var(--success);">
-            <label>Total Earnings</label>
-            <div id="vPay" class="val" style="color:var(--success)">$ 0.00</div>
+        <div class="card" style="margin-top:15px; border-left:4px solid var(--success);">
+            <label>TOTAL PAY</label><h2 id="vPay" style="color:var(--success)">$ 0.00</h2>
         </div>
         <div class="grid">
             <button class="btn-main" style="background:#10b981;" onclick="exportarExcel()">📊 EXCEL</button>
             <button class="btn-main" style="background:#ef4444;" onclick="exportarPDF()">📄 PDF INVOICE</button>
         </div>
     </div>
+    
+    <div class="powered-by">Developed & Powered By : Isaqueavlis</div>
 </div>
 
 <div id="modal">
     <div class="modal-content">
-        <h3 style="margin-bottom:20px;">⚙️ Invoice Settings</h3>
-        
-        <label>Your Address (Street, City, State)</label>
-        <textarea id="uAddr" rows="2" style="margin-bottom:15px;"></textarea>
-
-        <label>Company Address</label>
-        <textarea id="cAddr" rows="2" style="margin-bottom:15px;"></textarea>
-
-        <hr style="margin:20px 0; opacity:0.1;">
-        <label style="color:var(--p)">PAYMENT METHOD</label>
-        
+        <h3>⚙️ Settings</h3>
+        <label>Your Address</label><textarea id="uAddr" rows="2"></textarea>
+        <label>Company Address</label><textarea id="cAddr" rows="2"></textarea>
         <div class="grid" style="margin-top:10px;">
             <div class="full"><label>Bank Name</label><input type="text" id="bName"></div>
-            <div><label>Account / Routing</label><input type="text" id="bAcc"></div>
-            <div><label>Swift Code</label><input type="text" id="bSwift"></div>
-            <div class="full"><label>PayPal Email</label><input type="text" id="bPaypal"></div>
+            <div><label>Account</label><input type="text" id="bAcc"></div>
+            <div><label>Swift</label><input type="text" id="bSwift"></div>
+            <div class="full"><label>PayPal</label><input type="text" id="bPaypal"></div>
         </div>
-
-        <button class="btn-main" style="margin-top:25px;" onclick="toggleModal(false)">OK - SAVE & BACK</button>
+        <button class="btn-main" style="margin-top:20px;" onclick="toggleModal(false)">SAVE & BACK</button>
+        <div class="powered-by">Developed & Powered By : Isaqueavlis</div>
     </div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('db_isaque_v12')) || [];
+    let db = JSON.parse(localStorage.getItem('db_isaque_v13')) || [];
 
-    function saveConfig() {
-        localStorage.setItem('u_n', document.getElementById('uN').value);
-        localStorage.setItem('u_c', document.getElementById('uC').value);
-        localStorage.setItem('u_r', document.getElementById('uR').value);
-        localStorage.setItem('u_addr', document.getElementById('uAddr').value);
-        localStorage.setItem('c_addr', document.getElementById('cAddr').value);
-        localStorage.setItem('b_name', document.getElementById('bName').value);
-        localStorage.setItem('b_acc', document.getElementById('bAcc').value);
-        localStorage.setItem('b_swift', document.getElementById('bSwift').value);
-        localStorage.setItem('b_paypal', document.getElementById('bPaypal').value);
+    function iniciarApp() {
+        document.getElementById('splash').style.display = 'none';
+        document.getElementById('app-content').style.display = 'block';
+        desenhar();
     }
 
-    function toggleModal(show) {
-        document.getElementById('modal').style.display = show ? 'block' : 'none';
-        if(!show) saveConfig();
+    function toggleModal(s) {
+        document.getElementById('modal').style.display = s ? 'block' : 'none';
+        if(!s) {
+            localStorage.setItem('u_addr', document.getElementById('uAddr').value);
+            localStorage.setItem('c_addr', document.getElementById('cAddr').value);
+            localStorage.setItem('b_name', document.getElementById('bName').value);
+            localStorage.setItem('b_acc', document.getElementById('bAcc').value);
+            localStorage.setItem('b_swift', document.getElementById('bSwift').value);
+            localStorage.setItem('b_paypal', document.getElementById('bPaypal').value);
+        }
     }
 
     function show(p) {
         document.querySelectorAll('.panel, .t-btn').forEach(el => el.classList.remove('active'));
         document.getElementById('p-'+p).classList.add('active');
         document.getElementById(p === 'lancar' ? 'b1' : 'b2').classList.add('active');
-        if(p === 'resumo') atualizarKpis();
-    }
-
-    function atualizarKpis() {
-        let m = db.reduce((a,b)=> a + b.m, 0);
-        let ot = db.reduce((a,b)=> a + b.ot, 0);
-        let g = db.reduce((a,b)=> a + b.g, 0);
-        document.getElementById('vTotal').innerText = Math.floor(m/60) + "h " + (m%60) + "m";
-        document.getElementById('vOT').innerText = Math.floor(ot/60) + "h " + (ot%60) + "m";
-        document.getElementById('vPay').innerText = "US$ " + g.toFixed(2);
+        if(p === 'resumo') {
+            let m = db.reduce((a,b)=> a+b.m, 0), ot = db.reduce((a,b)=> a+b.ot, 0), g = db.reduce((a,b)=> a+b.g, 0);
+            document.getElementById('vTotal').innerText = Math.floor(m/60)+"h "+(m%60)+"m";
+            document.getElementById('vOT').innerText = Math.floor(ot/60)+"h "+(ot%60)+"m";
+            document.getElementById('vPay').innerText = "$ " + g.toFixed(2);
+        }
     }
 
     const m = (t) => { if(!t) return 0; const [h,min] = t.split(':'); return parseInt(h)*60 + parseInt(min); };
-    const mToH = (minutos) => Math.floor(minutos/60) + ":" + (minutos%60 < 10 ? '0' : '') + (minutos%60);
 
     function salvarPonto() {
         const d = document.getElementById('data').value, r = parseFloat(document.getElementById('uR').value) || 0;
-        const t1 = document.getElementById('t1').value, t2 = document.getElementById('t2').value;
-        const l1 = document.getElementById('l1').value, l2 = document.getElementById('l2').value;
-
-        if(!d || !t1 || !t2) return alert("Fill Date, In and Out!");
-        let total = m(t2) - m(t1);
-        if(l1 && l2) total -= (m(l2) - m(l1));
-
+        const total = (m(document.getElementById('t2').value) - m(document.getElementById('t1').value)) - (m(document.getElementById('l2').value) - m(document.getElementById('l1').value));
+        if(total < 0 || isNaN(total)) return alert("Check times!");
         let obj = { id: Date.now(), d, m: total, ot: Math.max(0, total-480), g: (total/60)*r };
         db = db.filter(x => x.d !== d); db.push(obj);
-        localStorage.setItem('db_isaque_v12', JSON.stringify(db));
-        desenharTabela(); alert("Saved!");
+        localStorage.setItem('db_isaque_v13', JSON.stringify(db));
+        localStorage.setItem('u_n', document.getElementById('uN').value);
+        localStorage.setItem('u_c', document.getElementById('uC').value);
+        localStorage.setItem('u_r', r);
+        desenhar(); alert("Saved!");
     }
 
-    function desenharTabela() {
-        let html = '';
+    function desenhar() {
+        let h = '';
         db.sort((a,b)=>b.d.localeCompare(a.d)).forEach(x => {
-            html += `<tr><td>${x.d.split('-').reverse().join('/')}</td><td><b>${mToH(x.m)}</b></td><td>$${x.g.toFixed(2)}</td><td><button onclick="apagarRegistro(${x.id})" style="border:none; background:none;">❌</button></td></tr>`;
+            h += `<tr><td>${x.d}</td><td>${Math.floor(x.m/60)}h</td><td>$${x.g.toFixed(2)}</td><td><button onclick="del(${x.id})" style="border:none;background:none">❌</button></td></tr>`;
         });
-        document.getElementById('listaPonto').innerHTML = html;
+        document.getElementById('listaPonto').innerHTML = h;
     }
 
-    function apagarRegistro(id) { if(confirm("Delete?")) { db = db.filter(x=>x.id!==id); localStorage.setItem('db_isaque_v12', JSON.stringify(db)); desenharTabela(); } }
+    function del(id) { if(confirm("Delete?")) { db = db.filter(x=>x.id!==id); localStorage.setItem('db_isaque_v13', JSON.stringify(db)); desenhar(); } }
 
     function exportarExcel() {
-        const rows = db.sort((a,b)=>a.d.localeCompare(b.d)).map(x => ({
-            "Date": x.d, "Work Hours": mToH(x.m), "Overtime": mToH(x.ot), "Earnings": x.g.toFixed(2)
-        }));
+        const rows = db.map(x => ({ Date: x.d, Hours: Math.floor(x.m/60)+":"+(x.m%60), Overtime: Math.floor(x.ot/60)+":"+(x.ot%60), Pay: x.g.toFixed(2) }));
         const ws = XLSX.utils.json_to_sheet(rows);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Report");
+        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
         XLSX.writeFile(wb, "Timesheet_Isaque.xlsx");
     }
 
     function exportarPDF() {
-        const { jsPDF } = window.jspdf; 
-        const doc = new jsPDF();
-        const n = document.getElementById('uN').value || "N/A";
-        const c = document.getElementById('uC').value || "N/A";
-        const uA = document.getElementById('uAddr').value || "";
-        const cA = document.getElementById('cAddr').value || "";
-        const total = db.reduce((a,b)=>a+b.g, 0);
+        const { jsPDF } = window.jspdf; const doc = new jsPDF();
+        const n = document.getElementById('uN').value, c = document.getElementById('uC').value;
+        const totalG = db.reduce((a,b)=>a+b.g, 0);
 
-        // Header
-        doc.setFillColor(30, 41, 59); doc.rect(0, 0, 210, 50, 'F');
-        doc.setTextColor(255, 255, 255); doc.setFontSize(24); doc.text("INVOICE", 15, 25);
-        doc.setFontSize(10); doc.text(`Date: ${new Date().toLocaleDateString()}`, 15, 35);
+        // Header Design (Split)
+        doc.setFillColor(255, 255, 255); doc.rect(0, 0, 105, 60, 'F'); // Left White
+        doc.setFillColor(30, 41, 59); doc.rect(105, 0, 105, 60, 'F'); // Right Dark
 
-        // To / From Section
-        doc.setTextColor(30, 41, 59); doc.setFontSize(10);
-        doc.setFont(undefined, 'bold'); doc.text("FROM:", 15, 65);
-        doc.setFont(undefined, 'normal'); doc.text(`${n}\n${uA}`, 15, 72);
+        // Text Left
+        doc.setTextColor(30, 41, 59); doc.setFontSize(22); doc.setFont(undefined, 'bold'); doc.text(c || "COMPANY", 15, 25);
+        
+        // Text Right (Payment Details in Header)
+        doc.setTextColor(255, 255, 255); doc.setFontSize(24); doc.text("INVOICE", 120, 25);
+        doc.setFontSize(8); doc.setFont(undefined, 'normal');
+        doc.text(`Bank: ${document.getElementById('bName').value}`, 120, 38);
+        doc.text(`Acc: ${document.getElementById('bAcc').value}`, 120, 43);
+        doc.text(`Swift: ${document.getElementById('bSwift').value}`, 120, 48);
+        doc.text(`PayPal: ${document.getElementById('bPaypal').value}`, 120, 53);
 
-        doc.setFont(undefined, 'bold'); doc.text("INVOICE TO:", 120, 65);
-        doc.setFont(undefined, 'normal'); doc.text(`${c}\n${cA}`, 120, 72);
+        // Addresses
+        doc.setTextColor(30, 41, 59); doc.setFontSize(10); doc.setFont(undefined, 'bold');
+        doc.text("FROM:", 15, 75); doc.setFont(undefined, 'normal'); doc.text(`${n}\n${document.getElementById('uAddr').value}`, 15, 82);
+        doc.setFont(undefined, 'bold'); doc.text("INVOICE TO:", 120, 75); doc.setFont(undefined, 'normal'); doc.text(`${c}\n${document.getElementById('cAddr').value}`, 120, 82);
+
+        // Due Total Box
+        doc.setFillColor(235, 235, 235); doc.rect(15, 95, 60, 12, 'F');
+        doc.setFont(undefined, 'bold'); doc.text(`Due Total: $ ${totalG.toFixed(2)}`, 20, 103);
 
         // Table
-        const tableData = db.sort((a,b)=>a.d.localeCompare(b.d)).map(x=>[x.d, mToH(x.m), mToH(x.ot), "$ "+x.g.toFixed(2)]);
         doc.autoTable({
             head: [['Date', 'Hours', 'Overtime', 'Total']],
-            body: tableData,
-            startY: 100,
-            theme: 'striped',
-            headStyles: {fillColor: [79, 70, 229]},
-            columnStyles: { 3: {halign: 'right'} }
+            body: db.map(x=>[x.d, Math.floor(x.m/60)+":"+(x.m%60), Math.floor(x.ot/60)+":"+(x.ot%60), "$ "+x.g.toFixed(2)]),
+            startY: 115, theme: 'grid', headStyles: {fillColor: [30, 41, 59]}
         });
 
-        // Summary & Bank
-        const finalY = doc.lastAutoTable.finalY + 15;
-        doc.setFont(undefined, 'bold'); doc.text("PAYMENT DETAILS:", 15, finalY);
-        doc.setFont(undefined, 'normal'); doc.setFontSize(9);
-        const bInfo = `Bank: ${document.getElementById('bName').value}\nAcc: ${document.getElementById('bAcc').value}\nSwift: ${document.getElementById('bSwift').value}\nPayPal: ${document.getElementById('bPaypal').value}`;
-        doc.text(bInfo, 15, finalY + 7);
-
-        doc.setFillColor(30, 41, 59); doc.rect(130, finalY, 65, 12, 'F');
-        doc.setTextColor(255, 255, 255); doc.setFontSize(12); doc.setFont(undefined, 'bold');
-        doc.text(`TOTAL DUE: $ ${total.toFixed(2)}`, 135, finalY + 8);
+        const finalY = doc.lastAutoTable.finalY + 20;
+        doc.setFontSize(7); doc.text("by Isaque", 15, finalY);
+        doc.setFontSize(10); doc.text("__________________________", 130, finalY + 10);
+        doc.text("Accounting Manager", 135, finalY + 16);
+        doc.setFontSize(8); doc.text("Developed & Powered By : Isaqueavlis", 80, 285);
 
         doc.save(`Invoice_${n}.pdf`);
     }
 
     window.onload = () => {
-        document.getElementById('data').value = new Date().toISOString().split('T')[0];
         document.getElementById('uN').value = localStorage.getItem('u_n') || '';
         document.getElementById('uC').value = localStorage.getItem('u_c') || '';
         document.getElementById('uR').value = localStorage.getItem('u_r') || '';
@@ -265,7 +248,18 @@
         document.getElementById('bAcc').value = localStorage.getItem('b_acc') || '';
         document.getElementById('bSwift').value = localStorage.getItem('b_swift') || '';
         document.getElementById('bPaypal').value = localStorage.getItem('b_paypal') || '';
-        desenharTabela();
+        
+        // Super Navigation Flow
+        const inputs = document.querySelectorAll('.nav-f');
+        inputs.forEach((inp, i) => {
+            inp.addEventListener('keydown', e => {
+                if(e.key === 'Enter') {
+                    e.preventDefault();
+                    if(i < inputs.length - 1) inputs[i+1].focus();
+                    else salvarPonto();
+                }
+            });
+        });
     };
 </script>
 </body>
