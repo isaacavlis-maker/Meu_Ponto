@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Timesheet Pro Isaque V25</title>
+    <title>Timesheet Pro Isaque V27</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -45,6 +45,8 @@
         table { width:100%; border-collapse:collapse; }
         td { padding:10px; border-bottom: 1px solid #f1f5f9; font-size:0.85rem; }
         .powered-by { text-align:center; font-size:9px; color:#94a3b8; margin-top:15px; font-weight:bold; text-transform:uppercase; }
+        
+        .sub-lbl { font-size: 0.75rem; color:#64748b; font-weight:bold; margin-top:5px; display:block; }
     </style>
 </head>
 <body>
@@ -64,7 +66,7 @@
 
 <div id="app-content" style="display:none; padding:15px;">
     <header>
-        <div><b id="txt-title">Time Tracker</b><br><small>Platinum V25</small></div>
+        <div><b id="txt-title">Time Tracker</b><br><small>Platinum V27</small></div>
         <button onclick="toggleModal(true)" style="background:rgba(255,255,255,0.1); border:none; color:white; padding:8px; border-radius:10px;">⚙️</button>
     </header>
 
@@ -97,10 +99,25 @@
 
     <div id="p-resumo" class="panel">
         <div class="card" style="border-left:5px solid var(--accent); text-align:center;">
-            <label id="txt-t-l">Total a Receber</label>
+            <label id="txt-t-l">Total a Receber (Mês)</label>
             <h2 id="vPay" style="color:var(--accent); font-size:2.2rem;">$ 0.00</h2>
-            <p id="txt-ot-info" style="font-size:0.8rem; color:#94a3b8; margin-top:5px;"></p>
+            <span class="sub-lbl" id="txt-m-total">Horas no Mês: 0h 0m</span>
         </div>
+        
+        <div class="card" style="border-left:5px solid var(--ot);">
+            <label style="color:var(--ot); font-weight:bold;">Métricas desta Semana</label>
+            <div class="grid" style="margin-top:10px;">
+                <div>
+                    <label>Horas Regulares</label>
+                    <b id="txt-wk-reg" style="font-size:1.1rem;">0h 0m</b>
+                </div>
+                <div>
+                    <label style="color:var(--ot);">Overtime (Norma >8h/dia)</label>
+                    <b id="txt-wk-ot" style="font-size:1.1rem; color:var(--ot);">0h 0m</b>
+                </div>
+            </div>
+        </div>
+
         <div class="grid">
             <button class="btn-3d" style="background:#10b981; box-shadow:0 4px 0 #059669;" onclick="exportarExcel()">📊 EXCEL</button>
             <button class="btn-3d" style="background:#ef4444; box-shadow:0 4px 0 #dc2626;" onclick="exportarPDF()">📄 INVOICE PDF</button>
@@ -112,7 +129,8 @@
 <div id="modal">
     <div class="modal-content">
         <h3>⚙️ Invoice Settings</h3>
-        <label>Logo URL (Opcional)</label><input type="text" id="uLogo">
+        <label>Logo da Empresa (Upload)</label>
+        <input type="file" id="logoUpload" accept="image/*" style="margin-bottom:15px; font-size:0.85rem;">
         <label>Seu Endereço (FROM)</label><textarea id="uAddr" rows="2"></textarea>
         <label>Endereço da Empresa (TO)</label><textarea id="cAddr" rows="2"></textarea>
         <div class="grid">
@@ -126,15 +144,45 @@
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('db_isq_final_v25')) || [];
+    let db = JSON.parse(localStorage.getItem('db_isq_final_v27')) || [];
     let invNum = parseInt(localStorage.getItem('inv_num')) || 1;
     let lang = 'pt';
+    let base64Logo = localStorage.getItem('isq_logo_compressed') || "";
+
+    // Listener para o Upload e Compressão Leve da Imagem
+    document.getElementById('logoUpload').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 150; // Comprime para tamanho leve padrão
+                    canvas.height = 150;
+                    const ctx = canvas.getContext('20d');
+                    canvas.getContext('2d').drawImage(img, 0, 0, 150, 150);
+                    base64Logo = canvas.toDataURL('image/png');
+                    localStorage.setItem('isq_logo_compressed', base64Logo);
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
 
     const trad = {
-        en: { title: "Time Tracker", nl: "Name", cl: "Company", rl: "Rate", btn: "SAVE DAY", tl: "Total Earnings", b1: "ENTRY", b2: "REPORT", ot: "Overtime: " },
-        pt: { title: "Controle de Ponto", nl: "Seu Nome", cl: "Empresa", rl: "Valor Hora", btn: "SALVAR DIA", tl: "Total a Receber", b1: "LANÇAR", b2: "RELATÓRIO", ot: "Hora Extra: " },
-        es: { title: "Control de Horas", nl: "Nombre", cl: "Empresa", rl: "Precio Hora", btn: "GUARDAR DIA", tl: "Total a Recibir", b1: "REGISTRO", b2: "REPORTE", ot: "Horas Extras: " }
+        en: { title: "Time Tracker", nl: "Name", cl: "Company", rl: "Rate", btn: "SAVE DAY", tl: "Total Earnings (Month)", b1: "ENTRY", b2: "REPORT", mHours: "Hours this Month: " },
+        pt: { title: "Controle de Ponto", nl: "Seu Nome", cl: "Empresa", rl: "Valor Hora", btn: "SALVAR DIA", tl: "Total a Receber (Mês)", b1: "LANÇAR", b2: "RELATÓRIO", mHours: "Horas no Mês: " },
+        es: { title: "Control de Horas", nl: "Nombre", cl: "Empresa", rl: "Precio Hora", btn: "GUARDAR DIA", tl: "Total a Recibir (Mes)", b1: "REGISTRO", b2: "REPORTE", mHours: "Horas del Mes: " }
     };
+
+    function obterDataHoje() {
+        const hoje = new Date();
+        const offset = hoje.getTimezoneOffset();
+        const dataLocal = new Date(hoje.getTime() - (offset * 60 * 1000));
+        return dataLocal.toISOString().split('T')[0];
+    }
 
     function iniciarApp() {
         lang = document.getElementById('langSet').value;
@@ -149,6 +197,8 @@
         document.getElementById('b2').innerText = t.b2;
         document.getElementById('splash').style.display = 'none';
         document.getElementById('app-content').style.display = 'block';
+        
+        document.getElementById('data').value = obterDataHoje();
         desenhar();
     }
 
@@ -160,10 +210,16 @@
             localStorage.setItem('b_name', document.getElementById('bName').value);
             localStorage.setItem('b_acc', document.getElementById('bAcc').value);
             localStorage.setItem('b_paypal', document.getElementById('bPaypal').value);
-            localStorage.setItem('u_logo', document.getElementById('uLogo').value);
             invNum = parseInt(document.getElementById('iNext').value) || 1;
             localStorage.setItem('inv_num', invNum);
         }
+    }
+
+    function obterNumeroSemana(dStr) {
+        const d = new Date(dStr + 'T00:00:00');
+        const primeiraDataAno = new Date(d.getFullYear(), 0, 1);
+        const dias = Math.floor((d - primeiraDataAno) / (24 * 60 * 60 * 1000));
+        return Math.ceil((dias + primeiraDataAno.getDay() + 1) / 7);
     }
 
     function show(p) {
@@ -171,25 +227,49 @@
         document.getElementById('p-'+p).classList.add('active');
         document.getElementById(p === 'lancar' ? 'b1' : 'b2').classList.add('active');
         if(p === 'resumo') {
-            let g = db.reduce((a,b)=> a+b.g, 0), ot = db.reduce((a,b)=> a+b.ot, 0);
+            let g = db.reduce((a,b)=> a+b.g, 0);
+            let totalMinutosMes = db.reduce((a,b)=> a+b.m, 0);
+            
             document.getElementById('vPay').innerText = "$ " + g.toFixed(2);
-            document.getElementById('txt-ot-info').innerText = trad[lang].ot + Math.floor(ot/60) + "h " + (ot%60) + "m";
+            document.getElementById('txt-m-total').innerText = trad[lang].mHours + Math.floor(totalMinutosMes/60) + "h " + (totalMinutosMes%60) + "m";
+            
+            const hojeStr = obterDataHoje();
+            const semanaAtual = obterNumeroSemana(hojeStr);
+            
+            let minutosRegSemana = 0;
+            let minutosOtSemana = 0;
+            
+            db.forEach(x => {
+                if(obterNumeroSemana(x.d) === semanaAtual) {
+                    minutosOtSemana += x.ot;
+                    minutosRegSemana += (x.m - x.ot);
+                }
+            });
+            
+            document.getElementById('txt-wk-reg').innerText = Math.floor(minutosRegSemana/60) + "h " + (minutosRegSemana%60) + "m";
+            document.getElementById('txt-wk-ot').innerText = Math.floor(minutosOtSemana/60) + "h " + (minutosOtSemana%60) + "m";
         }
     }
 
     const m = (t) => { if(!t) return 0; const [h,min] = t.split(':'); return parseInt(h)*60 + parseInt(min); };
+    const mToH = (min) => Math.floor(min/60) + "h " + (min%60) + "m";
 
     function salvarPonto() {
         const d = document.getElementById('data').value, r = parseFloat(document.getElementById('uR').value) || 0;
         const total = (m(document.getElementById('t2').value) - m(document.getElementById('t1').value)) - (m(document.getElementById('l2').value) - m(document.getElementById('l1').value));
         if(isNaN(total) || total <= 0) return alert("Erro nos horários!");
-        let obj = { id: Date.now(), d, m: total, ot: Math.max(0, total-480), g: (total/60)*r };
+        
+        // Norma das 8h diárias
+        let overtimeDoDia = Math.max(0, total - 480);
+        
+        let obj = { id: Date.now(), d, m: total, ot: overtimeDoDia, g: (total/60)*r };
         db = db.filter(x => x.d !== d); db.push(obj);
-        localStorage.setItem('db_isq_final_v25', JSON.stringify(db));
+        localStorage.setItem('db_isq_final_v27', JSON.stringify(db));
         localStorage.setItem('isq_un', document.getElementById('uN').value);
         localStorage.setItem('isq_uc', document.getElementById('uC').value);
         localStorage.setItem('isq_ur', r);
         desenhar(); alert("Salvo!");
+        document.getElementById('data').value = obterDataHoje();
     }
 
     function desenhar() {
@@ -200,10 +280,10 @@
         document.getElementById('listaPonto').innerHTML = h;
     }
 
-    function del(id) { if(confirm("Apagar?")) { db = db.filter(x=>x.id!==id); localStorage.setItem('db_isq_final_v25', JSON.stringify(db)); desenhar(); } }
+    function del(id) { if(confirm("Apagar?")) { db = db.filter(x=>x.id!==id); localStorage.setItem('db_isq_final_v27', JSON.stringify(db)); desenhar(); } }
 
     function exportarExcel() {
-        const rows = db.map(x => ({ Data: x.d, Horas: Math.floor(x.m/60)+":"+x.m%60, Ganho: x.g.toFixed(2) }));
+        const rows = db.map(x => ({ Data: x.d, Horas: Math.floor(x.m/60)+":"+x.m%60, Overtime: Math.floor(x.ot/60)+":"+x.ot%60, Ganho: x.g.toFixed(2) }));
         const ws = XLSX.utils.json_to_sheet(rows);
         const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Dados");
         XLSX.writeFile(wb, "Ponto_Isaque.xlsx");
@@ -218,8 +298,8 @@
         doc.setFillColor(30, 41, 59); doc.rect(105, 0, 105, 60, 'F');
         doc.setFillColor(255, 255, 255); doc.rect(0, 0, 105, 60, 'F');
         
-        const logo = document.getElementById('uLogo').value;
-        if(logo) { try { doc.addImage(logo, 'PNG', 15, 10, 30, 30); } catch(e) {} }
+        // Logo Redimensionado de Forma Suave (Tamanho 30x30 real)
+        if(base64Logo) { try { doc.addImage(base64Logo, 'PNG', 15, 12, 30, 30, undefined, 'FAST'); } catch(e) {} }
         else { doc.setTextColor(30); doc.setFontSize(22); doc.text(c || "COMPANY", 15, 25); }
 
         doc.setTextColor(255); doc.setFontSize(26); doc.text("INVOICE", 120, 25);
@@ -229,7 +309,7 @@
         doc.text("INVOICE TO:", 15, 75); doc.setFont(undefined, 'normal'); doc.text(`${c}\n${cA}`, 15, 81);
         doc.setFont(undefined, 'bold'); doc.text("FROM:", 120, 75); doc.setFont(undefined, 'normal'); doc.text(`${n}\n${uA}`, 120, 81);
 
-        doc.autoTable({ startY: 105, head: [['DATE', 'HOURS', 'OVERTIME', 'TOTAL']], body: db.sort((a,b)=>a.d.localeCompare(b.d)).map(x=>[x.d, Math.floor(x.m/60)+"h "+x.m%60+"m", Math.floor(x.ot/60)+"h", "$ "+x.g.toFixed(2)]), theme: 'striped', headStyles: {fillColor:[30, 41, 59]} });
+        doc.autoTable({ startY: 105, head: [['DATE', 'REG. HOURS', 'OVERTIME', 'DAILY TOTAL']], body: db.sort((a,b)=>a.d.localeCompare(b.d)).map(x=>[x.d.split('-').reverse().join('/'), mToH(x.m - x.ot), mToH(x.ot), "$ "+x.g.toFixed(2)]), theme: 'striped', headStyles: {fillColor:[30, 41, 59]} });
         doc.setFontSize(14); doc.text(`TOTAL DUE: $ ${totalG.toFixed(2)}`, 140, doc.lastAutoTable.finalY + 15);
         doc.setFontSize(8); doc.text("Developed & Powered By : Isaqueavlis", 80, 290);
         
@@ -247,7 +327,6 @@
         document.getElementById('bName').value = localStorage.getItem('b_name') || '';
         document.getElementById('bAcc').value = localStorage.getItem('b_acc') || '';
         document.getElementById('bPaypal').value = localStorage.getItem('b_paypal') || '';
-        document.getElementById('uLogo').value = localStorage.getItem('u_logo') || '';
         document.getElementById('iNext').value = invNum;
         
         const ins = document.querySelectorAll('.nav-f');
