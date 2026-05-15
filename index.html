@@ -1,43 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Timesheet Pro Isaque - Platinum V24</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
-        // Título e Info (Lado Escuro)
-        doc.setTextColor(255, 255, 255); doc.setFontSize(26); doc.setFont(undefined, 'bold');
-        doc.text("INVOICE", 120, 25);
-        doc.setFontSize(10); doc.setFont(undefined, 'normal');
-        doc.text(`Nº: ${Date.now().toString().slice(-5)}`, 120, 35);
-        doc.text(`Data: ${new Date().toLocaleDateString()}`, 120, 42);
+    <style>
+        :root { --p: #6366f1; --ot: #fbbf24; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #818cf8; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: var(--text); padding-bottom: 50px; min-height: 100vh; }
+        
+        #splash { position:fixed; top:0; left:0; width:100%; height:100%; background: var(--bg); display:flex; align-items:center; justify-content:center; z-index:9999; flex-direction:column; }
+        header { padding:30px 20px; text-align: center; }
+        header h1 { font-size: 1.5rem; letter-spacing: 2px; color: var(--accent); }
+        
+        .card { background: var(--card); border-radius:24px; padding:20px; margin: 0 15px 20px 15px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); }
+        .grid { display:grid; grid-template-columns: 1fr 1fr; gap:15px; }
+        .full { grid-column: span 2; }
+        label { font-size: 0.7rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; display: block; }
+        input, select { width:100%; padding:14px; border:1px solid rgba(255,255,255,0.1); border-radius:14px; background: rgba(15, 23, 42, 0.6); color: white; font-size:1rem; outline: none; }
 
-        // TO / FROM
-        doc.setTextColor(30, 41, 59); doc.setFontSize(11); doc.setFont(undefined, 'bold');
-        doc.text("INVOICE TO (CLIENTE):", 15, 75);
-        doc.setFont(undefined, 'normal'); doc.text(`${c}
-${aC}`, 15, 82);
+        .btn-3d { background: linear-gradient(180deg, var(--accent) 0%, var(--p) 100%); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 800; cursor: pointer; text-transform: uppercase; box-shadow: 0 6px 0 #3730a3; transition: 0.1s; width: 100%; }
+        .btn-3d:active { box-shadow: 0 2px 0 #3730a3; transform: translateY(4px); }
 
-        doc.setFont(undefined, 'bold'); doc.text("FROM (EMISSOR):", 120, 75);
-        doc.setFont(undefined, 'normal'); doc.text(`${n}
-${aM}`, 120, 82);
+        .tabs { display:flex; gap:10px; padding:0 15px; margin-bottom:20px; }
+        .t-btn { flex:1; padding:14px; border:none; border-radius:15px; background: rgba(255,255,255,0.05); color: #94a3b8; font-weight:700; }
+        .t-btn.active { background: var(--card); color: var(--accent); border: 1px solid rgba(129, 140, 248, 0.3); }
 
-        // Tabela
-        doc.autoTable({
-            startY: 100,
-            head: [['DATA', 'HORAS', 'OVERTIME', 'VALOR ($)']],
-            body: db.sort((a,b)=>a.d.localeCompare(b.d)).map(x => [x.d, formatM(x.m), formatM(x.ot), x.g.toFixed(2)]),
-            theme: 'striped',
-            headStyles: { fillColor: [30, 41, 59] }
+        .kpi-card { background: var(--card); padding: 20px; border-radius: 24px; text-align: center; border-bottom: 4px solid var(--p); margin-bottom:15px; }
+        .kpi-val { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+
+        table { width:100%; border-collapse:collapse; }
+        td { padding:15px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size:0.9rem; }
+        #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; }
+        .m-content { background: var(--card); border-radius:30px; padding:30px; width:90%; max-width:400px; }
+        .powered { text-align: center; font-size: 10px; color: #64748b; margin-top: 30px; font-weight: 900; }
+    </style>
+</head>
+<body>
+
+<div id="splash">
+    <h1 style="color:var(--accent); margin-bottom:20px;">PLATINUM V24</h1>
+    <button class="btn-3d" style="width:200px" onclick="iniciar()">ACESSAR</button>
+</div>
+
+<div id="app" style="display:none;">
+    <header>
+        <h1 id="txt-title">TIME TRACKER</h1>
+        <button onclick="toggleModal(true)" style="background:none; border: 1px solid #475569; color: #94a3b8; padding: 5px 15px; border-radius: 20px; font-size: 11px; margin-top:10px;">CONFIGURAÇÕES ⚙️</button>
+    </header>
+
+    <div class="tabs">
+        <button id="b-l" class="t-btn active" onclick="nav('lancar')">REGISTRO</button>
+        <button id="b-r" class="t-btn" onclick="nav('resumo')">RELATÓRIO</button>
+    </div>
+
+    <div id="p-lancar">
+        <div class="card">
+            <div class="grid">
+                <div class="full"><label>DATA</label><input type="date" id="data" class="enter-nav"></div>
+                <div><label>ENTRADA</label><input type="time" id="t1" class="enter-nav"></div>
+                <div><label>SAÍDA</label><input type="time" id="t2" class="enter-nav"></div>
+                <div><label>ALMOÇO IN</label><input type="time" id="l1" class="enter-nav"></div>
+                <div><label>ALMOÇO OUT</label><input type="time" id="l2" class="enter-nav"></div>
+            </div>
+            <button class="btn-3d" style="margin-top:25px;" onclick="salvar()">SALVAR REGISTRO</button>
+        </div>
+        <div class="card"><table id="tabela"></table></div>
+    </div>
+
+    <div id="p-resumo" style="display:none; padding:0 15px;">
+        <div class="kpi-card"><label>TOTAL HORAS</label><div id="sum-h" class="kpi-val">0h</div></div>
+        <div class="kpi-card"><label>TOTAL OVERTIME</label><div id="sum-ot" class="kpi-val" style="color:var(--ot)">0h</div></div>
+        <div class="kpi-card" style="border-bottom-color: #10b981;"><label>VALOR TOTAL</label><div id="sum-pay" class="kpi-val" style="color:#10b981;">$ 0.00</div></div>
+        <div class="grid">
+            <button class="btn-3d" style="background: #10b981; box-shadow: 0 6px 0 #065f46;" onclick="exportarExcel()">EXCEL</button>
+            <button class="btn-3d" style="background: #ef4444; box-shadow: 0 6px 0 #991b1b;" onclick="gerarPDF()">PDF INVOICE</button>
+        </div>
+    </div>
+    <div class="powered">DEVELOPED & POWERED BY ISAQUEAVLIS</div>
+</div>
+
+<div id="modal">
+    <div class="m-content">
+        <label>SEU NOME (FROM)</label><input type="text" id="uN">
+        <label>ENDEREÇO (FROM)</label><input type="text" id="uAddrM">
+        <label>EMPRESA (TO)</label><input type="text" id="uC">
+        <label>ENDEREÇO EMPRESA (TO)</label><input type="text" id="uAddrC">
+        <label>VALOR HORA ($)</label><input type="number" id="uR">
+        <button class="btn-3d" style="margin-top:20px;" onclick="toggleModal(false)">SALVAR</button>
+    </div>
+</div>
+
+<script>
+    let db = JSON.parse(localStorage.getItem('isq_db_final')) || [];
+    
+    function iniciar() {
+        document.getElementById('splash').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        document.getElementById('uN').value = localStorage.getItem('uN') || '';
+        document.getElementById('uC').value = localStorage.getItem('uC') || '';
+        document.getElementById('uR').value = localStorage.getItem('uR') || '';
+        document.getElementById('uAddrC').value = localStorage.getItem('uAddrC') || '';
+        document.getElementById('uAddrM').value = localStorage.getItem('uAddrM') || '';
+        render(); setupEnter();
+    }
+
+    function setupEnter() {
+        const ins = document.querySelectorAll('.enter-nav');
+        ins.forEach((inp, i) => {
+            inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); if (i < ins.length - 1) ins[i + 1].focus(); else salvar(); } });
         });
+    }
 
-        const finalY = doc.lastAutoTable.finalY + 15;
-        doc.setFontSize(14); doc.setFont(undefined, 'bold');
-        doc.text(`TOTAL DUE: $ ${total.toFixed(2)}`, 140, finalY);
+    function toggleModal(s) {
+        document.getElementById('modal').style.display = s ? 'flex' : 'none';
+        if(!s) {
+            localStorage.setItem('uN', document.getElementById('uN').value);
+            localStorage.setItem('uC', document.getElementById('uC').value);
+            localStorage.setItem('uR', document.getElementById('uR').value);
+            localStorage.setItem('uAddrC', document.getElementById('uAddrC').value);
+            localStorage.setItem('uAddrM', document.getElementById('uAddrM').value);
+        }
+    }
 
-        doc.setFontSize(8); doc.setTextColor(150);
-        doc.text("DEVELOPED & POWERED BY ISAQUEAVLIS", 75, 285);
+    function nav(p) {
+        document.getElementById('p-lancar').style.display = p === 'lancar' ? 'block' : 'none';
+        document.getElementById('p-resumo').style.display = p === 'resumo' ? 'block' : 'none';
+        document.getElementById('b-l').className = p === 'lancar' ? 't-btn active' : 't-btn';
+        document.getElementById('b-r').className = p === 'resumo' ? 't-btn active' : 't-btn';
+        if(p === 'resumo') calc();
+    }
+
+    const parseM = (t) => { if(!t) return 0; const [h,m] = t.split(':'); return parseInt(h)*60 + parseInt(m); };
+    const formatM = (min) => `${Math.floor(min/60)}h ${min%60}m`;
+
+    function salvar() {
+        const d = document.getElementById('data').value, r = parseFloat(document.getElementById('uR').value) || 0;
+        if(!d) return alert("Data!");
+        let total = parseM(document.getElementById('t2').value) - parseM(document.getElementById('t1').value);
+        let lunch = parseM(document.getElementById('l2').value) - parseM(document.getElementById('l1').value);
+        let real = total - (lunch > 0 ? lunch : 0);
+        if(real <= 0) return alert("Erro!");
+        db = db.filter(x => x.d !== d);
+        db.push({ d, m: real, ot: Math.max(0, real - 480), g: (real/60)*r });
+        localStorage.setItem('isq_db_final', JSON.stringify(db));
+        render(); alert("Salvo!");
+    }
+
+    function render() {
+        let h = '';
+        db.sort((a,b) => b.d.localeCompare(a.d)).forEach(x => {
+            h += `<tr><td>${x.d}</td><td style="color:var(--accent)">${formatM(x.m)}</td><td>$${x.g.toFixed(2)}</td><td onclick="del('${x.d}')">❌</td></tr>`;
+        });
+        document.getElementById('tabela').innerHTML = h;
+    }
+
+    function del(d) { db = db.filter(x => x.d !== d); localStorage.setItem('isq_db_final', JSON.stringify(db)); render(); }
+
+    function calc() {
+        let th = db.reduce((a,b) => a+b.m,0), totOt = db.reduce((a,b) => a+b.ot,0), pay = db.reduce((a,b) => a+b.g,0);
+        document.getElementById('sum-h').innerText = formatM(th);
+        document.getElementById('sum-ot').innerText = formatM(totOt);
+        document.getElementById('sum-pay').innerText = `$ ${pay.toFixed(2)}`;
+    }
+
+    function gerarPDF() {
+        const { jsPDF } = window.jspdf; const doc = new jsPDF();
+        const n = document.getElementById('uN').value, c = document.getElementById('uC').value;
+        const total = db.reduce((a,b) => a+b.g, 0);
+
+        doc.setFillColor(30, 41, 59); doc.rect(105, 0, 105, 60, 'F');
+        doc.setFillColor(255, 255, 255); doc.rect(0, 0, 105, 60, 'F');
+        doc.setTextColor(255); doc.setFontSize(26); doc.text("INVOICE", 120, 25);
+        doc.setFontSize(10); doc.text(`Data: ${new Date().toLocaleDateString()}`, 120, 40);
+
+        // TO na Esquerda, FROM na Direita
+        doc.setTextColor(30); doc.setFontSize(11); doc.setFont(undefined, 'bold');
+        doc.text("INVOICE TO:", 15, 75);
+        doc.setFont(undefined, 'normal'); doc.text(`${c}\n${document.getElementById('uAddrC').value}`, 15, 82);
+
+        doc.setFont(undefined, 'bold'); doc.text("FROM:", 120, 75);
+        doc.setFont(undefined, 'normal'); doc.text(`${n}\n${document.getElementById('uAddrM').value}`, 120, 82);
+
+        doc.autoTable({ startY: 100, head: [['DATA', 'HORAS', 'OVERTIME', 'VALOR']], body: db.sort((a,b)=>a.d.localeCompare(b.d)).map(x => [x.d, formatM(x.m), formatM(x.ot), "$ "+x.g.toFixed(2)]), theme: 'striped', headStyles: { fillColor: [30, 41, 59] } });
+        doc.text(`TOTAL DUE: $ ${total.toFixed(2)}`, 140, doc.lastAutoTable.finalY + 15);
         doc.save(`Invoice_${n}.pdf`);
     }
 
     function exportarExcel() {
         const ws = XLSX.utils.json_to_sheet(db);
-        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Relatorio");
-        XLSX.writeFile(wb, "Timesheet_Isaque_V23.xlsx");
+        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Dados");
+        XLSX.writeFile(wb, "Relatorio_Isaque.xlsx");
     }
 </script>
 </body>
