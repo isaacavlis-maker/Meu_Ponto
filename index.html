@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Timesheet Pro Isaque V16</title>
+    <title>Timesheet Pro Isaque V17</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -56,7 +56,7 @@
 
 <div id="app-content" style="display:none; padding:15px;">
     <header>
-        <div><b id="txt-title">Time Tracker</b><br><small>Platinum V16</small></div>
+        <div><b id="txt-title">Time Tracker</b><br><small>Platinum V17</small></div>
         <button onclick="toggleModal(true)" style="background:none; border:none; color:white; font-size:20px;">⚙️</button>
     </header>
 
@@ -112,7 +112,7 @@
             <div class="full"><label>Banco</label><input type="text" id="bName"></div>
             <div><label>Conta</label><input type="text" id="bAcc"></div>
             <div><label>Swift</label><input type="text" id="bSwift"></div>
-            <div class="full"><label>PayPal / Zelle</label><input type="text" id="bPaypal"></div>
+            <div class="full"><label>PayPal/Zelle</label><input type="text" id="bPaypal"></div>
             <div class="full"><label>Próximo Nº Invoice</label><input type="number" id="iNext"></div>
         </div>
         <button class="btn-main" style="margin-top:20px;" onclick="toggleModal(false)">SALVAR E VOLTAR</button>
@@ -120,7 +120,7 @@
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('db_isaque_v16')) || [];
+    let db = JSON.parse(localStorage.getItem('db_isaque_v17')) || [];
     let invNum = parseInt(localStorage.getItem('inv_num')) || 1;
     let currentLang = 'pt';
     let base64Logo = localStorage.getItem('isq_logo_b64') || "";
@@ -186,7 +186,7 @@
         if(isNaN(total)) return alert("Preencha os horários!");
         let obj = { id: Date.now(), d, m: total, ot: Math.max(0, total-480), g: (total/60)*r };
         db = db.filter(x => x.d !== d); db.push(obj);
-        localStorage.setItem('db_isaque_v16', JSON.stringify(db));
+        localStorage.setItem('db_isaque_v17', JSON.stringify(db));
         localStorage.setItem('u_n', document.getElementById('uN').value);
         localStorage.setItem('u_c', document.getElementById('uC').value);
         localStorage.setItem('u_r', r);
@@ -201,7 +201,7 @@
         document.getElementById('listaPonto').innerHTML = h;
     }
 
-    function del(id) { if(confirm("Apagar?")) { db = db.filter(x=>x.id!==id); localStorage.setItem('db_isaque_v16', JSON.stringify(db)); desenhar(); } }
+    function del(id) { if(confirm("Apagar?")) { db = db.filter(x=>x.id!==id); localStorage.setItem('db_isaque_v17', JSON.stringify(db)); desenhar(); } }
 
     function exportarExcel() {
         const rows = db.map(x => ({ Date: x.d, Hours: Math.floor(x.m/60)+":"+(x.m%60), Total: x.g.toFixed(2) }));
@@ -216,37 +216,34 @@
         const uAddr = document.getElementById('uAddr').value, cAddr = document.getElementById('cAddr').value;
         const totalG = db.reduce((a,b)=>a+b.g, 0);
 
-        // Backgrounds
-        doc.setFillColor(255, 255, 255); doc.rect(0, 0, 105, 65, 'F');
-        doc.setFillColor(30, 41, 59); doc.rect(105, 0, 105, 65, 'F');
+        // Header Backgrounds (Strict Clean)
+        doc.setFillColor(255, 255, 255); doc.rect(0, 0, 105, 55, 'F');
+        doc.setFillColor(30, 41, 59); doc.rect(105, 0, 105, 55, 'F');
 
-        // Logo
-        if(base64Logo) { try { doc.addImage(base64Logo, 'PNG', 15, 10, 35, 35); } catch(e) {} }
-        else { doc.setTextColor(30,41,59); doc.setFontSize(22); doc.setFont(undefined, 'bold'); doc.text(c || "COMPANY", 15, 25); }
+        // Logo (Ultra Small and Smooth, Top Left)
+        if(base64Logo) { try { doc.addImage(base64Logo, 'PNG', 15, 12, 20, 20); } catch(e) {} }
+        else { doc.setTextColor(30,41,59); doc.setFontSize(18); doc.setFont(undefined, 'bold'); doc.text(c || "COMPANY", 15, 25); }
 
-        // Right Info Block
+        // Right Info Block (Clean)
         doc.setTextColor(255, 255, 255); doc.setFontSize(26); doc.setFont(undefined, 'bold'); doc.text("INVOICE", 125, 25);
         doc.setFontSize(9); doc.setFont(undefined, 'normal');
         doc.text(`Invoice no: ${invNum}`, 125, 35);
         doc.text(`Invoice Date: ${new Date().toLocaleDateString('en-US')}`, 125, 40);
         
-        doc.setFont(undefined, 'bold'); doc.text("Payment method:", 125, 48);
-        doc.setFont(undefined, 'normal');
-        doc.text(`Bank Name: ${document.getElementById('bName').value}`, 125, 53);
-        doc.text(`Acc Number: ${document.getElementById('bAcc').value}`, 125, 58);
-        doc.text(`PayPal/Zelle: ${document.getElementById('bPaypal').value}`, 125, 63);
+        doc.text(`Acc: ${document.getElementById('bAcc').value}`, 125, 48);
+        doc.text(`PayPal/Zelle: ${document.getElementById('bPaypal').value}`, 125, 53);
 
-        // Address Section
+        // FROM e TO
         doc.setTextColor(30, 41, 59); doc.setFontSize(10);
-        doc.setFont(undefined, 'bold'); doc.text("FROM:", 15, 80);
-        doc.setFont(undefined, 'normal'); doc.text(`${n}\n${uAddr}`, 15, 86);
+        doc.setFont(undefined, 'bold'); doc.text("FROM:", 15, 75);
+        doc.setFont(undefined, 'normal'); doc.text(`${n}\n${uAddr}`, 15, 81);
         
-        doc.setFont(undefined, 'bold'); doc.text("INVOICE TO:", 120, 80);
-        doc.setFont(undefined, 'normal'); doc.text(`${c}\n${cAddr}`, 120, 86);
+        doc.setFont(undefined, 'bold'); doc.text("INVOICE TO:", 120, 75);
+        doc.setFont(undefined, 'normal'); doc.text(`${c}\n${cAddr}`, 120, 81);
 
-        // Due Total
-        doc.setFillColor(235, 235, 235); doc.rect(15, 105, 75, 12, 'F');
-        doc.setFont(undefined, 'bold'); doc.setFontSize(12); doc.text(`Due Total: $ ${totalG.toFixed(2)}`, 20, 113);
+        // Due Total (Clean Center)
+        doc.setFillColor(235, 235, 235); doc.rect(15, 100, 75, 12, 'F');
+        doc.setFont(undefined, 'bold'); doc.setFontSize(12); doc.text(`Due Total: $ ${totalG.toFixed(2)}`, 20, 108);
 
         // Table
         doc.autoTable({
