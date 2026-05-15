@@ -3,200 +3,264 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Timesheet Pro Isaque - Platinum V24</title>
+    <title>Timesheet Pro Isaque V25</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        :root { --p: #6366f1; --ot: #fbbf24; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #818cf8; }
-        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--bg); color: var(--text); padding-bottom: 50px; min-height: 100vh; }
+        :root { --p: #1e293b; --accent: #4f46e5; --ot: #f59e0b; --bg: #f1f5f9; --text: #1e293b; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, system-ui, sans-serif; }
+        body { background: var(--bg); color: var(--text); padding-bottom: 50px; }
         
-        #splash { position:fixed; top:0; left:0; width:100%; height:100%; background: var(--bg); display:flex; align-items:center; justify-content:center; z-index:9999; flex-direction:column; }
-        header { padding:30px 20px; text-align: center; }
-        header h1 { font-size: 1.5rem; letter-spacing: 2px; color: var(--accent); }
+        /* Splash Screen */
+        #splash { position:fixed; top:0; left:0; width:100%; height:100%; background: #1e293b; display:flex; align-items:center; justify-content:center; z-index:9999; color:white; flex-direction:column; }
+        .splash-card { background: rgba(255,255,255,0.05); padding: 30px; border-radius: 25px; text-align: center; width: 85%; max-width: 350px; border: 1px solid rgba(255,255,255,0.1); }
         
-        .card { background: var(--card); border-radius:24px; padding:20px; margin: 0 15px 20px 15px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); }
-        .grid { display:grid; grid-template-columns: 1fr 1fr; gap:15px; }
+        header { background:#1e293b; color:white; padding:20px; border-radius:0 0 20px 20px; display:flex; justify-content:space-between; align-items: center; margin-bottom:15px; }
+        .card { background:white; border-radius:20px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,0.05); margin-bottom:15px; border: 1px solid #e2e8f0; }
+        .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
         .full { grid-column: span 2; }
-        label { font-size: 0.7rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; display: block; }
-        input, select { width:100%; padding:14px; border:1px solid rgba(255,255,255,0.1); border-radius:14px; background: rgba(15, 23, 42, 0.6); color: white; font-size:1rem; outline: none; }
+        label { font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        input, select, textarea { width:100%; padding:12px; border:2px solid #e2e8f0; border-radius:12px; font-size:1rem; outline: none; background: #f8fafc; }
+        
+        /* Botões 3D Suaves */
+        .btn-3d { 
+            background: linear-gradient(to bottom, #4f46e5, #4338ca); 
+            color: white; border: none; padding: 15px; border-radius: 12px; 
+            font-weight: bold; cursor: pointer; width: 100%;
+            box-shadow: 0 4px 0 #312e81; transition: all 0.1s;
+        }
+        .btn-3d:active { transform: translateY(3px); box-shadow: 0 1px 0 #312e81; }
 
-        .btn-3d { background: linear-gradient(180deg, var(--accent) 0%, var(--p) 100%); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 800; cursor: pointer; text-transform: uppercase; box-shadow: 0 6px 0 #3730a3; transition: 0.1s; width: 100%; }
-        .btn-3d:active { box-shadow: 0 2px 0 #3730a3; transform: translateY(4px); }
-
-        .tabs { display:flex; gap:10px; padding:0 15px; margin-bottom:20px; }
-        .t-btn { flex:1; padding:14px; border:none; border-radius:15px; background: rgba(255,255,255,0.05); color: #94a3b8; font-weight:700; }
-        .t-btn.active { background: var(--card); color: var(--accent); border: 1px solid rgba(129, 140, 248, 0.3); }
-
-        .kpi-card { background: var(--card); padding: 20px; border-radius: 24px; text-align: center; border-bottom: 4px solid var(--p); margin-bottom:15px; }
-        .kpi-val { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
-
+        .tabs { display:flex; gap:8px; background:#e2e8f0; padding:5px; border-radius:15px; margin-bottom:20px; }
+        .t-btn { flex:1; padding:12px; border:none; border-radius:10px; background:transparent; font-weight:bold; color: #64748b; }
+        .t-btn.active { background:white; color:var(--accent); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
+        .panel { display:none; } .panel.active { display:block; }
+        #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; padding:20px; overflow-y:auto; }
+        .modal-content { background:white; border-radius:25px; padding:25px; max-width:500px; margin:auto; }
+        
         table { width:100%; border-collapse:collapse; }
-        td { padding:15px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size:0.9rem; }
-        #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; }
-        .m-content { background: var(--card); border-radius:30px; padding:30px; width:90%; max-width:400px; }
-        .powered { text-align: center; font-size: 10px; color: #64748b; margin-top: 30px; font-weight: 900; }
+        td { padding:10px; border-bottom: 1px solid #f1f5f9; font-size:0.85rem; }
+        .powered-by { text-align:center; font-size:9px; color:#94a3b8; margin-top:15px; font-weight:bold; text-transform:uppercase; }
     </style>
 </head>
 <body>
 
 <div id="splash">
-    <h1 style="color:var(--accent); margin-bottom:20px;">PLATINUM V24</h1>
-    <button class="btn-3d" style="width:200px" onclick="iniciar()">ACESSAR</button>
+    <div class="splash-card">
+        <h2 style="margin-bottom:10px;">TIMESHEET PRO</h2>
+        <select id="langSet" style="margin-bottom:20px; color: black;">
+            <option value="en">English (US)</option>
+            <option value="pt" selected>Português (BR)</option>
+            <option value="es">Español (ES)</option>
+        </select>
+        <button class="btn-3d" onclick="iniciarApp()">ENTRAR / START</button>
+        <div class="powered-by" style="color:white; opacity:0.5;">Developed & Powered By : Isaqueavlis</div>
+    </div>
 </div>
 
-<div id="app" style="display:none;">
+<div id="app-content" style="display:none; padding:15px;">
     <header>
-        <h1 id="txt-title">TIME TRACKER</h1>
-        <button onclick="toggleModal(true)" style="background:none; border: 1px solid #475569; color: #94a3b8; padding: 5px 15px; border-radius: 20px; font-size: 11px; margin-top:10px;">CONFIGURAÇÕES ⚙️</button>
+        <div><b id="txt-title">Time Tracker</b><br><small>Platinum V25</small></div>
+        <button onclick="toggleModal(true)" style="background:rgba(255,255,255,0.1); border:none; color:white; padding:8px; border-radius:10px;">⚙️</button>
     </header>
 
-    <div class="tabs">
-        <button id="b-l" class="t-btn active" onclick="nav('lancar')">REGISTRO</button>
-        <button id="b-r" class="t-btn" onclick="nav('resumo')">RELATÓRIO</button>
+    <div class="card">
+        <div class="grid">
+            <div class="full"><label id="txt-n-l">Seu Nome</label><input type="text" id="uN" class="nav-f"></div>
+            <div><label id="txt-c-l">Empresa</label><input type="text" id="uC" class="nav-f"></div>
+            <div><label id="txt-r-l">Valor Hora ($)</label><input type="number" id="uR" class="nav-f"></div>
+        </div>
     </div>
 
-    <div id="p-lancar">
+    <nav class="tabs">
+        <button id="b1" class="t-btn active" onclick="show('lancar')">LANÇAR</button>
+        <button id="b2" class="t-btn" onclick="show('resumo')">RELATÓRIO</button>
+    </nav>
+
+    <div id="p-lancar" class="panel active">
         <div class="card">
             <div class="grid">
-                <div class="full"><label>DATA</label><input type="date" id="data" class="enter-nav"></div>
-                <div><label>ENTRADA</label><input type="time" id="t1" class="enter-nav"></div>
-                <div><label>SAÍDA</label><input type="time" id="t2" class="enter-nav"></div>
-                <div><label>ALMOÇO IN</label><input type="time" id="l1" class="enter-nav"></div>
-                <div><label>ALMOÇO OUT</label><input type="time" id="l2" class="enter-nav"></div>
+                <div class="full"><label>Data</label><input type="date" id="data" class="nav-f"></div>
+                <div><label>Entrada</label><input type="time" id="t1" class="nav-f"></div>
+                <div><label>Saída Almoço</label><input type="time" id="l1" class="nav-f"></div>
+                <div><label>Volta Almoço</label><input type="time" id="l2" class="nav-f"></div>
+                <div><label>Saída Trabalho</label><input type="time" id="t2" class="nav-f"></div>
             </div>
-            <button class="btn-3d" style="margin-top:25px;" onclick="salvar()">SALVAR REGISTRO</button>
+            <button class="btn-3d" style="margin-top:20px;" onclick="salvarPonto()" id="txt-btn-s">SALVAR DIA</button>
         </div>
-        <div class="card"><table id="tabela"></table></div>
+        <div class="card" style="overflow-x:auto;"><table><tbody id="listaPonto"></tbody></table></div>
     </div>
 
-    <div id="p-resumo" style="display:none; padding:0 15px;">
-        <div class="kpi-card"><label>TOTAL HORAS</label><div id="sum-h" class="kpi-val">0h</div></div>
-        <div class="kpi-card"><label>TOTAL OVERTIME</label><div id="sum-ot" class="kpi-val" style="color:var(--ot)">0h</div></div>
-        <div class="kpi-card" style="border-bottom-color: #10b981;"><label>VALOR TOTAL</label><div id="sum-pay" class="kpi-val" style="color:#10b981;">$ 0.00</div></div>
+    <div id="p-resumo" class="panel">
+        <div class="card" style="border-left:5px solid var(--accent); text-align:center;">
+            <label id="txt-t-l">Total a Receber</label>
+            <h2 id="vPay" style="color:var(--accent); font-size:2.2rem;">$ 0.00</h2>
+            <p id="txt-ot-info" style="font-size:0.8rem; color:#94a3b8; margin-top:5px;"></p>
+        </div>
         <div class="grid">
-            <button class="btn-3d" style="background: #10b981; box-shadow: 0 6px 0 #065f46;" onclick="exportarExcel()">EXCEL</button>
-            <button class="btn-3d" style="background: #ef4444; box-shadow: 0 6px 0 #991b1b;" onclick="gerarPDF()">PDF INVOICE</button>
+            <button class="btn-3d" style="background:#10b981; box-shadow:0 4px 0 #059669;" onclick="exportarExcel()">📊 EXCEL</button>
+            <button class="btn-3d" style="background:#ef4444; box-shadow:0 4px 0 #dc2626;" onclick="exportarPDF()">📄 INVOICE PDF</button>
         </div>
     </div>
-    <div class="powered">DEVELOPED & POWERED BY ISAQUEAVLIS</div>
+    <div class="powered-by">Developed & Powered By : Isaqueavlis</div>
 </div>
 
 <div id="modal">
-    <div class="m-content">
-        <label>SEU NOME (FROM)</label><input type="text" id="uN">
-        <label>ENDEREÇO (FROM)</label><input type="text" id="uAddrM">
-        <label>EMPRESA (TO)</label><input type="text" id="uC">
-        <label>ENDEREÇO EMPRESA (TO)</label><input type="text" id="uAddrC">
-        <label>VALOR HORA ($)</label><input type="number" id="uR">
-        <button class="btn-3d" style="margin-top:20px;" onclick="toggleModal(false)">SALVAR</button>
+    <div class="modal-content">
+        <h3>⚙️ Invoice Settings</h3>
+        <label>Logo URL (Opcional)</label><input type="text" id="uLogo">
+        <label>Seu Endereço (FROM)</label><textarea id="uAddr" rows="2"></textarea>
+        <label>Endereço da Empresa (TO)</label><textarea id="cAddr" rows="2"></textarea>
+        <div class="grid">
+            <div class="full"><label>Banco</label><input type="text" id="bName"></div>
+            <div><label>Conta</label><input type="text" id="bAcc"></div>
+            <div class="full"><label>PayPal/Zelle</label><input type="text" id="bPaypal"></div>
+            <div class="full"><label>Próxima Invoice Nº</label><input type="number" id="iNext"></div>
+        </div>
+        <button class="btn-3d" style="margin-top:20px;" onclick="toggleModal(false)">SALVAR E VOLTAR</button>
     </div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('isq_db_final')) || [];
-    
-    function iniciar() {
-        document.getElementById('splash').style.display = 'none';
-        document.getElementById('app').style.display = 'block';
-        document.getElementById('uN').value = localStorage.getItem('uN') || '';
-        document.getElementById('uC').value = localStorage.getItem('uC') || '';
-        document.getElementById('uR').value = localStorage.getItem('uR') || '';
-        document.getElementById('uAddrC').value = localStorage.getItem('uAddrC') || '';
-        document.getElementById('uAddrM').value = localStorage.getItem('uAddrM') || '';
-        render(); setupEnter();
-    }
+    let db = JSON.parse(localStorage.getItem('db_isq_final_v25')) || [];
+    let invNum = parseInt(localStorage.getItem('inv_num')) || 1;
+    let lang = 'pt';
 
-    function setupEnter() {
-        const ins = document.querySelectorAll('.enter-nav');
-        ins.forEach((inp, i) => {
-            inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); if (i < ins.length - 1) ins[i + 1].focus(); else salvar(); } });
-        });
+    const trad = {
+        en: { title: "Time Tracker", nl: "Name", cl: "Company", rl: "Rate", btn: "SAVE DAY", tl: "Total Earnings", b1: "ENTRY", b2: "REPORT", ot: "Overtime: " },
+        pt: { title: "Controle de Ponto", nl: "Seu Nome", cl: "Empresa", rl: "Valor Hora", btn: "SALVAR DIA", tl: "Total a Receber", b1: "LANÇAR", b2: "RELATÓRIO", ot: "Hora Extra: " },
+        es: { title: "Control de Horas", nl: "Nombre", cl: "Empresa", rl: "Precio Hora", btn: "GUARDAR DIA", tl: "Total a Recibir", b1: "REGISTRO", b2: "REPORTE", ot: "Horas Extras: " }
+    };
+
+    function iniciarApp() {
+        lang = document.getElementById('langSet').value;
+        const t = trad[lang];
+        document.getElementById('txt-title').innerText = t.title;
+        document.getElementById('txt-n-l').innerText = t.nl;
+        document.getElementById('txt-c-l').innerText = t.cl;
+        document.getElementById('txt-r-l').innerText = t.rl;
+        document.getElementById('txt-btn-s').innerText = t.btn;
+        document.getElementById('txt-t-l').innerText = t.tl;
+        document.getElementById('b1').innerText = t.b1;
+        document.getElementById('b2').innerText = t.b2;
+        document.getElementById('splash').style.display = 'none';
+        document.getElementById('app-content').style.display = 'block';
+        desenhar();
     }
 
     function toggleModal(s) {
-        document.getElementById('modal').style.display = s ? 'flex' : 'none';
+        document.getElementById('modal').style.display = s ? 'block' : 'none';
         if(!s) {
-            localStorage.setItem('uN', document.getElementById('uN').value);
-            localStorage.setItem('uC', document.getElementById('uC').value);
-            localStorage.setItem('uR', document.getElementById('uR').value);
-            localStorage.setItem('uAddrC', document.getElementById('uAddrC').value);
-            localStorage.setItem('uAddrM', document.getElementById('uAddrM').value);
+            localStorage.setItem('u_addr', document.getElementById('uAddr').value);
+            localStorage.setItem('c_addr', document.getElementById('cAddr').value);
+            localStorage.setItem('b_name', document.getElementById('bName').value);
+            localStorage.setItem('b_acc', document.getElementById('bAcc').value);
+            localStorage.setItem('b_paypal', document.getElementById('bPaypal').value);
+            localStorage.setItem('u_logo', document.getElementById('uLogo').value);
+            invNum = parseInt(document.getElementById('iNext').value) || 1;
+            localStorage.setItem('inv_num', invNum);
         }
     }
 
-    function nav(p) {
-        document.getElementById('p-lancar').style.display = p === 'lancar' ? 'block' : 'none';
-        document.getElementById('p-resumo').style.display = p === 'resumo' ? 'block' : 'none';
-        document.getElementById('b-l').className = p === 'lancar' ? 't-btn active' : 't-btn';
-        document.getElementById('b-r').className = p === 'resumo' ? 't-btn active' : 't-btn';
-        if(p === 'resumo') calc();
+    function show(p) {
+        document.querySelectorAll('.panel, .t-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('p-'+p).classList.add('active');
+        document.getElementById(p === 'lancar' ? 'b1' : 'b2').classList.add('active');
+        if(p === 'resumo') {
+            let g = db.reduce((a,b)=> a+b.g, 0), ot = db.reduce((a,b)=> a+b.ot, 0);
+            document.getElementById('vPay').innerText = "$ " + g.toFixed(2);
+            document.getElementById('txt-ot-info').innerText = trad[lang].ot + Math.floor(ot/60) + "h " + (ot%60) + "m";
+        }
     }
 
-    const parseM = (t) => { if(!t) return 0; const [h,m] = t.split(':'); return parseInt(h)*60 + parseInt(m); };
-    const formatM = (min) => `${Math.floor(min/60)}h ${min%60}m`;
+    const m = (t) => { if(!t) return 0; const [h,min] = t.split(':'); return parseInt(h)*60 + parseInt(min); };
 
-    function salvar() {
+    function salvarPonto() {
         const d = document.getElementById('data').value, r = parseFloat(document.getElementById('uR').value) || 0;
-        if(!d) return alert("Data!");
-        let total = parseM(document.getElementById('t2').value) - parseM(document.getElementById('t1').value);
-        let lunch = parseM(document.getElementById('l2').value) - parseM(document.getElementById('l1').value);
-        let real = total - (lunch > 0 ? lunch : 0);
-        if(real <= 0) return alert("Erro!");
-        db = db.filter(x => x.d !== d);
-        db.push({ d, m: real, ot: Math.max(0, real - 480), g: (real/60)*r });
-        localStorage.setItem('isq_db_final', JSON.stringify(db));
-        render(); alert("Salvo!");
+        const total = (m(document.getElementById('t2').value) - m(document.getElementById('t1').value)) - (m(document.getElementById('l2').value) - m(document.getElementById('l1').value));
+        if(isNaN(total) || total <= 0) return alert("Erro nos horários!");
+        let obj = { id: Date.now(), d, m: total, ot: Math.max(0, total-480), g: (total/60)*r };
+        db = db.filter(x => x.d !== d); db.push(obj);
+        localStorage.setItem('db_isq_final_v25', JSON.stringify(db));
+        localStorage.setItem('isq_un', document.getElementById('uN').value);
+        localStorage.setItem('isq_uc', document.getElementById('uC').value);
+        localStorage.setItem('isq_ur', r);
+        desenhar(); alert("Salvo!");
     }
 
-    function render() {
+    function desenhar() {
         let h = '';
-        db.sort((a,b) => b.d.localeCompare(a.d)).forEach(x => {
-            h += `<tr><td>${x.d}</td><td style="color:var(--accent)">${formatM(x.m)}</td><td>$${x.g.toFixed(2)}</td><td onclick="del('${x.d}')">❌</td></tr>`;
+        db.sort((a,b)=>b.d.localeCompare(a.d)).forEach(x => {
+            h += `<tr><td>${x.d.split('-').reverse().join('/')}</td><td><b>${Math.floor(x.m/60)}h ${x.m%60}m</b></td><td>$${x.g.toFixed(2)}</td><td><button onclick="del(${x.id})" style="border:none;background:none">❌</button></td></tr>`;
         });
-        document.getElementById('tabela').innerHTML = h;
+        document.getElementById('listaPonto').innerHTML = h;
     }
 
-    function del(d) { db = db.filter(x => x.d !== d); localStorage.setItem('isq_db_final', JSON.stringify(db)); render(); }
+    function del(id) { if(confirm("Apagar?")) { db = db.filter(x=>x.id!==id); localStorage.setItem('db_isq_final_v25', JSON.stringify(db)); desenhar(); } }
 
-    function calc() {
-        let th = db.reduce((a,b) => a+b.m,0), totOt = db.reduce((a,b) => a+b.ot,0), pay = db.reduce((a,b) => a+b.g,0);
-        document.getElementById('sum-h').innerText = formatM(th);
-        document.getElementById('sum-ot').innerText = formatM(totOt);
-        document.getElementById('sum-pay').innerText = `$ ${pay.toFixed(2)}`;
+    function exportarExcel() {
+        const rows = db.map(x => ({ Data: x.d, Horas: Math.floor(x.m/60)+":"+x.m%60, Ganho: x.g.toFixed(2) }));
+        const ws = XLSX.utils.json_to_sheet(rows);
+        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Dados");
+        XLSX.writeFile(wb, "Ponto_Isaque.xlsx");
     }
 
-    function gerarPDF() {
+    function exportarPDF() {
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
         const n = document.getElementById('uN').value, c = document.getElementById('uC').value;
-        const total = db.reduce((a,b) => a+b.g, 0);
+        const uA = document.getElementById('uAddr').value, cA = document.getElementById('cAddr').value;
+        const totalG = db.reduce((a,b)=>a+b.g, 0);
 
         doc.setFillColor(30, 41, 59); doc.rect(105, 0, 105, 60, 'F');
         doc.setFillColor(255, 255, 255); doc.rect(0, 0, 105, 60, 'F');
+        
+        const logo = document.getElementById('uLogo').value;
+        if(logo) { try { doc.addImage(logo, 'PNG', 15, 10, 30, 30); } catch(e) {} }
+        else { doc.setTextColor(30); doc.setFontSize(22); doc.text(c || "COMPANY", 15, 25); }
+
         doc.setTextColor(255); doc.setFontSize(26); doc.text("INVOICE", 120, 25);
-        doc.setFontSize(10); doc.text(`Data: ${new Date().toLocaleDateString()}`, 120, 40);
+        doc.setFontSize(9); doc.text(`Invoice No: ${invNum}\nDate: ${new Date().toLocaleDateString()}\nBank: ${document.getElementById('bName').value}\nPayPal: ${document.getElementById('bPaypal').value}`, 120, 35);
 
-        // TO na Esquerda, FROM na Direita
-        doc.setTextColor(30); doc.setFontSize(11); doc.setFont(undefined, 'bold');
-        doc.text("INVOICE TO:", 15, 75);
-        doc.setFont(undefined, 'normal'); doc.text(`${c}\n${document.getElementById('uAddrC').value}`, 15, 82);
+        doc.setTextColor(30); doc.setFontSize(10); doc.setFont(undefined, 'bold');
+        doc.text("INVOICE TO:", 15, 75); doc.setFont(undefined, 'normal'); doc.text(`${c}\n${cA}`, 15, 81);
+        doc.setFont(undefined, 'bold'); doc.text("FROM:", 120, 75); doc.setFont(undefined, 'normal'); doc.text(`${n}\n${uA}`, 120, 81);
 
-        doc.setFont(undefined, 'bold'); doc.text("FROM:", 120, 75);
-        doc.setFont(undefined, 'normal'); doc.text(`${n}\n${document.getElementById('uAddrM').value}`, 120, 82);
-
-        doc.autoTable({ startY: 100, head: [['DATA', 'HORAS', 'OVERTIME', 'VALOR']], body: db.sort((a,b)=>a.d.localeCompare(b.d)).map(x => [x.d, formatM(x.m), formatM(x.ot), "$ "+x.g.toFixed(2)]), theme: 'striped', headStyles: { fillColor: [30, 41, 59] } });
-        doc.text(`TOTAL DUE: $ ${total.toFixed(2)}`, 140, doc.lastAutoTable.finalY + 15);
-        doc.save(`Invoice_${n}.pdf`);
+        doc.autoTable({ startY: 105, head: [['DATE', 'HOURS', 'OVERTIME', 'TOTAL']], body: db.sort((a,b)=>a.d.localeCompare(b.d)).map(x=>[x.d, Math.floor(x.m/60)+"h "+x.m%60+"m", Math.floor(x.ot/60)+"h", "$ "+x.g.toFixed(2)]), theme: 'striped', headStyles: {fillColor:[30, 41, 59]} });
+        doc.setFontSize(14); doc.text(`TOTAL DUE: $ ${totalG.toFixed(2)}`, 140, doc.lastAutoTable.finalY + 15);
+        doc.setFontSize(8); doc.text("Developed & Powered By : Isaqueavlis", 80, 290);
+        
+        invNum++; localStorage.setItem('inv_num', invNum);
+        document.getElementById('iNext').value = invNum;
+        doc.save(`Invoice_${invNum-1}.pdf`);
     }
 
-    function exportarExcel() {
-        const ws = XLSX.utils.json_to_sheet(db);
-        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Dados");
-        XLSX.writeFile(wb, "Relatorio_Isaque.xlsx");
-    }
+    window.onload = () => {
+        document.getElementById('uN').value = localStorage.getItem('isq_un') || '';
+        document.getElementById('uC').value = localStorage.getItem('isq_uc') || '';
+        document.getElementById('uR').value = localStorage.getItem('isq_ur') || '';
+        document.getElementById('uAddr').value = localStorage.getItem('u_addr') || '';
+        document.getElementById('cAddr').value = localStorage.getItem('c_addr') || '';
+        document.getElementById('bName').value = localStorage.getItem('b_name') || '';
+        document.getElementById('bAcc').value = localStorage.getItem('b_acc') || '';
+        document.getElementById('bPaypal').value = localStorage.getItem('b_paypal') || '';
+        document.getElementById('uLogo').value = localStorage.getItem('u_logo') || '';
+        document.getElementById('iNext').value = invNum;
+        
+        const ins = document.querySelectorAll('.nav-f');
+        ins.forEach((inp, i) => {
+            inp.addEventListener('keydown', e => {
+                if(e.key === 'Enter') {
+                    e.preventDefault();
+                    if(i < ins.length - 1) ins[i+1].focus();
+                    else salvarPonto();
+                }
+            });
+        });
+    };
 </script>
 </body>
 </html>
