@@ -1,195 +1,270 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ponto Pro Isaque</title>
+    <title>Timesheet Pro Isaque Platinum</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        :root { --p: #4f46e5; --ot: #f59e0b; --bg: #0f172a; }
-        * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, sans-serif; }
+        :root { --p: #4f46e5; --ot: #f59e0b; --bg: #0f172a; --text: #1e293b; --success: #10b981; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, system-ui, sans-serif; }
         
-        /* Splash Screen */
-        #splash { position:fixed; top:0; left:0; width:100%; height:100%; background:#0f172a; display:flex; align-items:center; justify-content:center; z-index:9999; color:white; flex-direction:column; }
-        .c-splash { background:rgba(255,255,255,0.1); padding:30px; border-radius:20px; text-align:center; width:85%; max-width:350px; }
+        #splash { position:fixed; top:0; left:0; width:100%; height:100%; background:linear-gradient(135deg, #0f172a, #1e293b); display:flex; align-items:center; justify-content:center; z-index:9999; color:white; flex-direction:column; transition: 0.5s; }
+        .c-splash { background:rgba(255,255,255,0.05); backdrop-filter: blur(10px); padding:40px; border-radius:30px; text-align:center; width:85%; max-width:400px; border: 1px solid rgba(255,255,255,0.1); }
         
-        /* Body principal SEM o display:none para evitar tela branca */
-        body { background:#f1f5f9; padding:15px; }
-        #app-content { display:none; }
+        body { background:#f1f5f9; color: var(--text); padding-bottom: 50px; }
+        #app-content { display:none; padding: 15px; }
 
-        header { background:#1e293b; color:white; padding:15px; border-radius:15px; margin-bottom:15px; display:flex; justify-content:space-between; }
-        .card { background:white; border-radius:15px; padding:15px; box-shadow:0 2px 5px rgba(0,0,0,0.05); margin-bottom:10px; }
-        .grid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
-        input, select { width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-top:5px; font-size:16px; }
-        button { background:var(--p); color:white; border:none; padding:12px; border-radius:10px; width:100%; font-weight:bold; margin-top:10px; cursor:pointer; }
-        .tabs { display:flex; gap:5px; margin-bottom:10px; }
-        .t-btn { flex:1; padding:10px; border:none; border-radius:10px; background:#cbd5e1; font-weight:bold; }
-        .t-btn.active { background:var(--p); color:white; }
+        header { background:#1e293b; color:white; padding:25px; border-radius:20px; margin-bottom:20px; display:flex; justify-content:space-between; align-items: center; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .card { background:white; border-radius:20px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,0.05); margin-bottom:15px; border: 1px solid #e2e8f0; }
+        .card-title { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 15px; display: block; }
+
+        .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+        .full { grid-column: span 2; }
+
+        label { font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        input, select { width:100%; padding:12px; border:2px solid #f1f5f9; border-radius:12px; background:#f8fafc; font-size:1rem; outline: none; transition: 0.2s; }
+        input:focus { border-color: var(--p); background: white; }
+
+        .tabs { display:flex; gap:8px; background:#e2e8f0; padding:5px; border-radius:15px; margin-bottom:20px; }
+        .t-btn { flex:1; padding:12px; border:none; border-radius:10px; background:transparent; font-weight:bold; color: #64748b; cursor:pointer; }
+        .t-btn.active { background:white; color:var(--p); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+
         .panel { display:none; } .panel.active { display:block; }
-        table { width:100%; border-collapse:collapse; font-size:12px; margin-top:10px; }
-        th, td { padding:8px; border-bottom:1px solid #eee; text-align:left; }
+
+        button.btn-main { background:var(--p); color:white; border:none; padding:15px; border-radius:12px; width:100%; font-weight:bold; cursor:pointer; transition: 0.2s; }
+        button.btn-main:active { transform: scale(0.98); }
+
+        .kpi-box { padding: 20px; border-radius: 15px; border-left: 5px solid var(--p); background: #f8fafc; }
+        .val { font-size: 1.8rem; font-weight: 900; margin-top: 5px; }
+
+        table { width:100%; border-collapse:collapse; margin-top:10px; }
+        th { text-align:left; padding:12px; font-size:0.65rem; color:#94a3b8; text-transform:uppercase; border-bottom: 2px solid #f1f5f9; }
+        td { padding:12px; border-bottom: 1px solid #f1f5f9; font-size:0.85rem; }
+
+        footer { text-align:center; margin-top:40px; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+        .isaque-sig { font-weight: 900; color: var(--bg); letter-spacing: 1px; text-transform: uppercase; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
 <div id="splash">
     <div class="c-splash">
-        <img src="icon.png" style="width:70px; border-radius:15px; margin-bottom:10px;" onerror="this.style.display='none'">
-        <h2 style="margin-bottom:15px;">Timesheet Pro</h2>
-        <select id="langSet" style="margin-bottom:15px; color: black;">
+        <img src="icon.png" style="width:90px; border-radius:20px; margin-bottom:20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3);" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2088/2088617.png'">
+        <h2 style="margin-bottom:10px;">Timesheet Pro</h2>
+        <p style="font-size:0.8rem; opacity:0.7; margin-bottom:20px;">Select Language / Selecione o Idioma</p>
+        <select id="langSet" style="margin-bottom:20px; color: black;">
             <option value="en">English (US)</option>
             <option value="pt">Português (BR)</option>
             <option value="es">Español (ES)</option>
         </select>
-        <button onclick="iniciar()">START / INICIAR</button>
+        <button class="btn-main" onclick="iniciarApp()">START / INICIAR</button>
     </div>
 </div>
 
 <div id="app-content">
     <header>
-        <div><b id="txt-h">Time Tracker</b><br><small>ISAQUE EDITION</small></div>
-        <div id="clock">00:00</div>
+        <div><b id="txt-h" style="font-size: 1.2rem;">Time Tracker</b><br><small id="txt-sub">ISaque edition</small></div>
+        <div id="clock" style="font-weight: 900; font-size: 1.1rem;">00:00</div>
     </header>
 
     <div class="card">
+        <span class="card-title" id="t-profile">Profile & Company</span>
         <div class="grid">
-            <input type="text" id="uN" placeholder="Name">
-            <input type="text" id="uC" placeholder="Company">
+            <div class="full"><label id="l-name">Name</label><input type="text" id="uN" class="nav-in" placeholder="Your Name"></div>
+            <div><label id="l-comp">Company</label><input type="text" id="uC" class="nav-in" placeholder="Company Name"></div>
+            <div><label id="l-rate">Rate (US$)</label><input type="number" id="uR" class="nav-in" placeholder="0.00"></div>
         </div>
-        <input type="number" id="uR" placeholder="Rate US$" style="margin-top:10px;">
     </div>
 
-    <div class="tabs">
-        <button id="b1" class="t-btn active" onclick="ver('lancar')">ENTRY</button>
-        <button id="b2" class="t-btn" onclick="ver('resumo')">REPORT</button>
-    </div>
+    <nav class="tabs">
+        <button id="b1" class="t-btn active" onclick="show('lancar')">ENTRY</button>
+        <button id="b2" class="t-btn" onclick="show('resumo')">REPORT</button>
+    </nav>
 
     <div id="p-lancar" class="panel active">
         <div class="card">
-            <input type="date" id="data">
-            <div class="grid" style="margin-top:10px;">
-                <div><label>IN</label><input type="time" id="t1"></div>
-                <div><label>OUT</label><input type="time" id="t2"></div>
-                <div><label>LUNCH IN</label><input type="time" id="l1"></div>
-                <div><label>LUNCH OUT</label><input type="time" id="l2"></div>
+            <span class="card-title" id="t-new">New Shift</span>
+            <div class="grid">
+                <div class="full"><label id="l-date">Date</label><input type="date" id="data" class="nav-in"></div>
+                <div><label>IN</label><input type="time" id="t1" class="nav-in"></div>
+                <div><label>OUT</label><input type="time" id="t2" class="nav-in"></div>
+                <div><label>LUNCH IN</label><input type="time" id="l1" class="nav-in"></div>
+                <div><label>LUNCH OUT</label><input type="time" id="l2" class="nav-in"></div>
             </div>
-            <button onclick="salvar()" id="txt-btn">SAVE</button>
+            <button class="btn-main" style="margin-top:20px;" onclick="salvarPonto()" id="txt-btn">SAVE ENTRY</button>
         </div>
+
         <div class="card" style="overflow-x:auto;">
             <table>
-                <thead><tr><th>Date</th><th>Total</th><th>Pay</th><th></th></tr></thead>
-                <tbody id="lista"></tbody>
+                <thead><tr><th id="th1">Date</th><th id="th2">Total</th><th id="th3">Pay</th><th></th></tr></thead>
+                <tbody id="listaPonto"></tbody>
             </table>
         </div>
     </div>
 
     <div id="p-resumo" class="panel">
-        <div class="card">
-            <p id="txt-m">MONTH TOTAL</p>
-            <h2 id="vTotal">00:00</h2>
+        <div class="grid">
+            <div class="kpi-box"><label id="txt-mt">Month Total</label><div id="vTotal" class="val">00:00</div></div>
+            <div class="kpi-box" style="border-left-color: var(--ot);"><label id="txt-ot">Overtime</label><div id="vOT" class="val" style="color:var(--ot)">00:00</div></div>
         </div>
-        <div class="card" style="border-left:5px solid #10b981;">
-            <p id="txt-p">EARNINGS</p>
-            <h2 id="vPay" style="color:green;">$ 0.00</h2>
+        <div class="card" style="margin-top:15px; border-left: 5px solid var(--success);">
+            <label id="txt-earn">Total Earnings</label>
+            <div id="vPay" class="val" style="color:var(--success)">$ 0.00</div>
         </div>
         <div class="grid">
-            <button style="background:#10b981;" onclick="exportar()">EXCEL</button>
-            <button style="background:#ef4444;" onclick="pdf()">PDF</button>
+            <button class="btn-main" style="background:#10b981;" onclick="exportarExcel()">📊 EXCEL</button>
+            <button class="btn-main" style="background:#ef4444;" onclick="exportarPDF()">📄 PDF INVOICE</button>
         </div>
     </div>
     
-    <p style="text-align:center; font-size:10px; margin-top:20px; color:#64748b;">MADE BY ISAQUE</p>
+    <footer>
+        <p class="isaque-sig">Made by Isaque / Feito por Isaque</p>
+    </footer>
 </div>
 
 <script>
-    let dados = JSON.parse(localStorage.getItem('ponto_isq_v9')) || [];
+    let db = JSON.parse(localStorage.getItem('db_isaque_v10')) || [];
     let idioma = 'en';
 
     const trad = {
-        en: { h: "Time Tracker", b: "SAVE", t1: "ENTRY", t2: "REPORT", m: "MONTH TOTAL", p: "EARNINGS" },
-        pt: { h: "Controle de Ponto", b: "SALVAR", t1: "LANÇAR", t2: "RESUMO", m: "TOTAL DO MÊS", p: "GANHOS" },
-        es: { h: "Control de Horas", b: "GUARDAR", t1: "REGISTRO", t2: "REPORTE", m: "TOTAL MES", p: "PAGO" }
+        en: { h: "Time Tracker", sub: "Isaque Edition", profile: "Profile & Company", n: "Name", c: "Company", r: "Rate (US$)", t_new: "New Shift", d: "Date", btn: "SAVE ENTRY", b1: "ENTRY", b2: "REPORT", mt: "Month Total", ot: "Overtime", earn: "Total Earnings", th1: "Date", th2: "Total", th3: "Pay" },
+        pt: { h: "Controle de Ponto", sub: "Edição Isaque", profile: "Perfil e Empresa", n: "Nome", c: "Empresa", r: "Valor Hora", t_new: "Novo Lançamento", d: "Data", btn: "SALVAR PONTO", b1: "LANÇAR", b2: "RESUMO", mt: "Total do Mês", ot: "Hora Extra", earn: "Ganhos Totais", th1: "Data", th2: "Total", th3: "Ganho" },
+        es: { h: "Control de Horas", sub: "Edición Isaque", profile: "Perfil y Empresa", n: "Nombre", c: "Empresa", r: "Precio Hora", t_new: "Nuevo Registro", d: "Fecha", btn: "GUARDAR", b1: "REGISTRO", b2: "REPORTE", mt: "Total Mes", ot: "Extra", earn: "Pago Total", th1: "Fecha", th2: "Total", th3: "Pago" }
     };
 
-    function iniciar() {
+    function iniciarApp() {
         idioma = document.getElementById('langSet').value;
         const t = trad[idioma];
         document.getElementById('txt-h').innerText = t.h;
-        document.getElementById('txt-btn').innerText = t.b;
-        document.getElementById('b1').innerText = t.t1;
-        document.getElementById('b2').innerText = t.t2;
-        document.getElementById('txt-m').innerText = t.m;
-        document.getElementById('txt-p').innerText = t.p;
-        
-        document.getElementById('splash').style.display = 'none';
-        document.getElementById('app-content').style.display = 'block';
-        desenhar();
+        document.getElementById('txt-sub').innerText = t.sub;
+        document.getElementById('t-profile').innerText = t.profile;
+        document.getElementById('l-name').innerText = t.n;
+        document.getElementById('l-comp').innerText = t.c;
+        document.getElementById('l-rate').innerText = t.r;
+        document.getElementById('t-new').innerText = t.t_new;
+        document.getElementById('l-date').innerText = t.d;
+        document.getElementById('txt-btn').innerText = t.btn;
+        document.getElementById('b1').innerText = t.b1;
+        document.getElementById('b2').innerText = t.b2;
+        document.getElementById('txt-mt').innerText = t.mt;
+        document.getElementById('txt-ot').innerText = t.ot;
+        document.getElementById('txt-earn').innerText = t.earn;
+        document.getElementById('th1').innerText = t.th1;
+        document.getElementById('th2').innerText = t.th2;
+        document.getElementById('th3').innerText = t.th3;
+
+        document.getElementById('splash').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('splash').style.display = 'none';
+            document.getElementById('app-content').style.display = 'block';
+        }, 500);
+        desenharTabela();
     }
 
-    function ver(p) {
+    function show(p) {
         document.querySelectorAll('.panel, .t-btn').forEach(el => el.classList.remove('active'));
         document.getElementById('p-'+p).classList.add('active');
         document.getElementById(p === 'lancar' ? 'b1' : 'b2').classList.add('active');
         if(p === 'resumo') {
-            let minutos = dados.reduce((a,b)=> a + b.m, 0);
-            let grana = dados.reduce((a,b)=> a + b.g, 0);
-            document.getElementById('vTotal').innerText = Math.floor(minutos/60) + "h " + (minutos%60) + "m";
-            document.getElementById('vPay').innerText = "US$ " + grana.toFixed(2);
+            let m = db.reduce((a,b)=> a + b.m, 0);
+            let ot = db.reduce((a,b)=> a + b.ot, 0);
+            let g = db.reduce((a,b)=> a + b.g, 0);
+            document.getElementById('vTotal').innerText = Math.floor(m/60) + "h " + (m%60) + "m";
+            document.getElementById('vOT').innerText = Math.floor(ot/60) + "h " + (ot%60) + "m";
+            document.getElementById('vPay').innerText = "US$ " + g.toFixed(2);
         }
     }
 
-    function salvar() {
+    const m = (t) => { if(!t) return 0; const [h,min] = t.split(':'); return parseInt(h)*60 + parseInt(min); };
+    const mToH = (minutos) => Math.floor(minutos/60) + ":" + (minutos%60 < 10 ? '0' : '') + (minutos%60);
+
+    function salvarPonto() {
         const d = document.getElementById('data').value, r = parseFloat(document.getElementById('uR').value) || 0;
-        const i = document.getElementById('t1').value, o = document.getElementById('t2').value;
+        const t1 = document.getElementById('t1').value, t2 = document.getElementById('t2').value;
         const l1 = document.getElementById('l1').value, l2 = document.getElementById('l2').value;
 
-        if(!d || !i || !o) return alert("Error!");
-        const m = (t) => { const [h,min] = t.split(':'); return parseInt(h)*60 + parseInt(min); };
-        let total = m(o) - m(i);
+        if(!d || !t1 || !t2) return alert("Error! Date and In/Out required.");
+        
+        let total = m(t2) - m(t1);
         if(l1 && l2) total -= (m(l2) - m(l1));
+        if(total < 0) return alert("Time Error!");
 
-        let obj = { id: Date.now(), d, m: total, g: (total/60)*r };
-        dados = dados.filter(x => x.d !== d); dados.push(obj);
-        localStorage.setItem('ponto_isq_v9', JSON.stringify(dados));
-        localStorage.setItem('isq_n', document.getElementById('uN').value);
-        localStorage.setItem('isq_c', document.getElementById('uC').value);
-        localStorage.setItem('isq_r', r);
-        desenhar(); alert("Saved!");
+        let obj = { id: Date.now(), d, m: total, ot: Math.max(0, total-480), g: (total/60)*r };
+        db = db.filter(x => x.d !== d); db.push(obj);
+        localStorage.setItem('db_isaque_v10', JSON.stringify(db));
+        localStorage.setItem('u_n', document.getElementById('uN').value);
+        localStorage.setItem('u_c', document.getElementById('uC').value);
+        localStorage.setItem('u_r', r);
+        desenharTabela(); alert("Saved!");
     }
 
-    function desenhar() {
+    function desenharTabela() {
         let html = '';
-        dados.sort((a,b)=>b.d.localeCompare(a.d)).forEach(x => {
-            html += `<tr><td>${x.d}</td><td>${Math.floor(x.m/60)}h</td><td>$${x.g.toFixed(2)}</td><td><button onclick="apagar(${x.id})" style="background:none; color:red; margin:0; width:auto;">X</button></td></tr>`;
+        db.sort((a,b)=>b.d.localeCompare(a.d)).forEach(x => {
+            html += `<tr><td>${x.d.split('-').reverse().join('/')}</td><td><b>${mToH(x.m)}</b></td><td>$${x.g.toFixed(2)}</td><td><button onclick="apagarRegistro(${x.id})" style="background:none; border:none; color:red;">❌</button></td></tr>`;
         });
-        document.getElementById('lista').innerHTML = html;
+        document.getElementById('listaPonto').innerHTML = html;
     }
 
-    function apagar(id) { dados = dados.filter(x=>x.id!==id); localStorage.setItem('ponto_isq_v9', JSON.stringify(dados)); desenhar(); }
+    function apagarRegistro(id) { 
+        if(confirm("Delete?")) {
+            db = db.filter(x=>x.id!==id); 
+            localStorage.setItem('db_isaque_v10', JSON.stringify(db)); 
+            desenharTabela(); 
+        }
+    }
 
-    function exportar() {
+    function exportarExcel() {
+        const nome = document.getElementById('uN').value || "User";
+        const emp = document.getElementById('uC').value || "Company";
+        const dados = db.sort((a,b)=>a.d.localeCompare(b.d)).map(x => ({
+            "Colaborador": nome, "Empresa": emp, "Data": x.d, "Total Horas": mToH(x.m), "Overtime": mToH(x.ot), "Ganho (US$)": x.g.toFixed(2)
+        }));
         const ws = XLSX.utils.json_to_sheet(dados);
-        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Ponto");
-        XLSX.writeFile(wb, "Ponto.xlsx");
+        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Timesheet");
+        XLSX.writeFile(wb, `Timesheet_${nome}.xlsx`);
     }
 
-    function pdf() {
+    function exportarPDF() {
         const { jsPDF } = window.jspdf; let doc = new jsPDF();
-        doc.text("Report - Isaque", 10, 10);
-        doc.autoTable({ head: [['Date', 'Min', 'Pay']], body: dados.map(x=>[x.d, x.m, x.g.toFixed(2)]) });
-        doc.save("Report.pdf");
+        const nome = document.getElementById('uN').value || "N/A";
+        const emp = document.getElementById('uC').value || "N/A";
+        
+        doc.setFillColor(30, 41, 59); doc.rect(0, 0, 210, 40, 'F');
+        doc.setTextColor(255, 255, 255); doc.setFontSize(20); doc.text("WORK INVOICE / TIMESHEET", 14, 22);
+        doc.setFontSize(10); doc.text(`Worker: ${nome} | Company: ${emp} | Date: ${new Date().toLocaleDateString()}`, 14, 32);
+
+        const rows = db.sort((a,b)=>a.d.localeCompare(b.d)).map(x=>[x.d, mToH(x.m), mToH(x.ot), "$"+x.g.toFixed(2)]);
+        doc.autoTable({ head: [['Date', 'Total', 'Overtime', 'Pay']], body: rows, startY: 50, theme: 'striped', headStyles: {fillColor: [79, 70, 229]} });
+        
+        const totalG = db.reduce((a,b)=> a+b.g, 0);
+        doc.setTextColor(15, 23, 42); doc.text(`TOTAL EARNINGS: US$ ${totalG.toFixed(2)}`, 14, doc.lastAutoTable.finalY + 15);
+        doc.save(`Invoice_${nome}.pdf`);
     }
 
     window.onload = () => {
         document.getElementById('data').value = new Date().toISOString().split('T')[0];
-        document.getElementById('uN').value = localStorage.getItem('isq_n') || '';
-        document.getElementById('uC').value = localStorage.getItem('isq_c') || '';
-        document.getElementById('uR').value = localStorage.getItem('isq_r') || 0;
+        document.getElementById('uN').value = localStorage.getItem('u_n') || '';
+        document.getElementById('uC').value = localStorage.getItem('u_c') || '';
+        document.getElementById('uR').value = localStorage.getItem('u_r') || '';
         setInterval(()=> { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }, 1000);
+        
+        // Navegação por Enter
+        const ins = document.querySelectorAll('.nav-in');
+        ins.forEach((input, i) => {
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (i < ins.length - 1) ins[i + 1].focus();
+                    else salvarPonto();
+                }
+            });
+        });
     };
 </script>
 </body>
