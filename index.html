@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Timesheet Pro Isaque V15</title>
+    <title>Timesheet Pro Isaque V16</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -14,7 +14,6 @@
         * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, system-ui, sans-serif; }
         body { background: var(--bg); color: var(--text); padding-bottom: 50px; }
         
-        /* Splash Screen com Idiomas */
         #splash { position:fixed; top:0; left:0; width:100%; height:100%; background: #1e293b; display:flex; align-items:center; justify-content:center; z-index:9999; color:white; flex-direction:column; }
         .splash-card { background: rgba(255,255,255,0.05); padding: 30px; border-radius: 25px; text-align: center; width: 85%; max-width: 350px; border: 1px solid rgba(255,255,255,0.1); }
         
@@ -45,7 +44,6 @@
 <div id="splash">
     <div class="splash-card">
         <h2 style="margin-bottom:10px;">HORAS CONTROLE</h2>
-        <p style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 20px;">Selecione o Idioma / Select Language</p>
         <select id="langSet" style="margin-bottom:20px; color: black;">
             <option value="en">English (US)</option>
             <option value="pt" selected>Português (BR)</option>
@@ -58,7 +56,7 @@
 
 <div id="app-content" style="display:none; padding:15px;">
     <header>
-        <div><b id="txt-title">Time Tracker</b><br><small>Platinum V15</small></div>
+        <div><b id="txt-title">Time Tracker</b><br><small>Platinum V16</small></div>
         <button onclick="toggleModal(true)" style="background:none; border:none; color:white; font-size:20px;">⚙️</button>
     </header>
 
@@ -100,38 +98,45 @@
             <button class="btn-main" style="background:#ef4444;" onclick="exportarPDF()">📄 GERAR INVOICE</button>
         </div>
     </div>
-    
     <div class="powered-by">Developed & Powered By : Isaqueavlis</div>
 </div>
 
 <div id="modal">
     <div class="modal-content">
         <h3 style="margin-bottom:15px;">⚙️ Configurações</h3>
-        <label>Endereço do Logo (URL)</label><input type="text" id="uLogo">
+        <label>Logo da Empresa (Upload)</label>
+        <input type="file" id="logoUpload" accept="image/*" style="margin-bottom:10px; font-size:0.8rem;">
         <label>Seu Endereço (FROM)</label><textarea id="uAddr" rows="2"></textarea>
         <label>Endereço da Empresa (TO)</label><textarea id="cAddr" rows="2"></textarea>
         <div class="grid">
             <div class="full"><label>Banco</label><input type="text" id="bName"></div>
             <div><label>Conta</label><input type="text" id="bAcc"></div>
             <div><label>Swift</label><input type="text" id="bSwift"></div>
-            <div class="full"><label>PayPal</label><input type="text" id="bPaypal"></div>
+            <div class="full"><label>PayPal / Zelle</label><input type="text" id="bPaypal"></div>
             <div class="full"><label>Próximo Nº Invoice</label><input type="number" id="iNext"></div>
         </div>
         <button class="btn-main" style="margin-top:20px;" onclick="toggleModal(false)">SALVAR E VOLTAR</button>
-        <div class="powered-by">Developed & Powered By : Isaqueavlis</div>
     </div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('db_isaque_v15')) || [];
+    let db = JSON.parse(localStorage.getItem('db_isaque_v16')) || [];
     let invNum = parseInt(localStorage.getItem('inv_num')) || 1;
     let currentLang = 'pt';
+    let base64Logo = localStorage.getItem('isq_logo_b64') || "";
 
     const translations = {
         en: { title: "Time Tracker", name: "Your Name", comp: "Company", rate: "Hourly Rate", save: "SAVE DAY", total: "Total Earnings", launch: "ENTRY", report: "REPORT" },
         pt: { title: "Controle de Ponto", name: "Seu Nome", comp: "Empresa", rate: "Valor Hora", save: "SALVAR DIA", total: "Total a Receber", launch: "LANÇAR", report: "RELATÓRIO" },
         es: { title: "Control de Horas", name: "Su Nombre", comp: "Empresa", rate: "Precio Hora", save: "GUARDAR DÍA", total: "Total a Recibir", launch: "REGISTRO", report: "REPORTE" }
     };
+
+    document.getElementById('logoUpload').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onloadend = () => { base64Logo = reader.result; localStorage.setItem('isq_logo_b64', base64Logo); };
+        if (file) reader.readAsDataURL(file);
+    });
 
     function iniciarApp() {
         currentLang = document.getElementById('langSet').value;
@@ -144,7 +149,6 @@
         document.getElementById('txt-total-label').innerText = t.total;
         document.getElementById('b1').innerText = t.launch;
         document.getElementById('b2').innerText = t.report;
-
         document.getElementById('splash').style.display = 'none';
         document.getElementById('app-content').style.display = 'block';
         desenhar();
@@ -153,7 +157,6 @@
     function toggleModal(s) {
         document.getElementById('modal').style.display = s ? 'block' : 'none';
         if(!s) {
-            localStorage.setItem('u_logo', document.getElementById('uLogo').value);
             localStorage.setItem('u_addr', document.getElementById('uAddr').value);
             localStorage.setItem('c_addr', document.getElementById('cAddr').value);
             localStorage.setItem('b_name', document.getElementById('bName').value);
@@ -183,11 +186,11 @@
         if(isNaN(total)) return alert("Preencha os horários!");
         let obj = { id: Date.now(), d, m: total, ot: Math.max(0, total-480), g: (total/60)*r };
         db = db.filter(x => x.d !== d); db.push(obj);
-        localStorage.setItem('db_isaque_v15', JSON.stringify(db));
+        localStorage.setItem('db_isaque_v16', JSON.stringify(db));
         localStorage.setItem('u_n', document.getElementById('uN').value);
         localStorage.setItem('u_c', document.getElementById('uC').value);
         localStorage.setItem('u_r', r);
-        desenhar(); alert(currentLang === 'pt' ? "Salvo!" : "Saved!");
+        desenhar(); alert("Salvo!");
     }
 
     function desenhar() {
@@ -198,10 +201,10 @@
         document.getElementById('listaPonto').innerHTML = h;
     }
 
-    function del(id) { if(confirm("Apagar?")) { db = db.filter(x=>x.id!==id); localStorage.setItem('db_isaque_v15', JSON.stringify(db)); desenhar(); } }
+    function del(id) { if(confirm("Apagar?")) { db = db.filter(x=>x.id!==id); localStorage.setItem('db_isaque_v16', JSON.stringify(db)); desenhar(); } }
 
     function exportarExcel() {
-        const rows = db.map(x => ({ Data: x.d, Horas: Math.floor(x.m/60)+":"+(x.m%60), Total: x.g.toFixed(2) }));
+        const rows = db.map(x => ({ Date: x.d, Hours: Math.floor(x.m/60)+":"+(x.m%60), Total: x.g.toFixed(2) }));
         const ws = XLSX.utils.json_to_sheet(rows);
         const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Ponto");
         XLSX.writeFile(wb, "Timesheet_Isaque.xlsx");
@@ -210,54 +213,54 @@
     function exportarPDF() {
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
         const n = document.getElementById('uN').value, c = document.getElementById('uC').value;
-        const uAddr = document.getElementById('uAddr').value;
-        const cAddr = document.getElementById('cAddr').value;
+        const uAddr = document.getElementById('uAddr').value, cAddr = document.getElementById('cAddr').value;
         const totalG = db.reduce((a,b)=>a+b.g, 0);
 
-        // Header Backgrounds
-        doc.setFillColor(255, 255, 255); doc.rect(0, 0, 105, 60, 'F');
-        doc.setFillColor(30, 41, 59); doc.rect(105, 0, 105, 60, 'F');
+        // Backgrounds
+        doc.setFillColor(255, 255, 255); doc.rect(0, 0, 105, 65, 'F');
+        doc.setFillColor(30, 41, 59); doc.rect(105, 0, 105, 65, 'F');
 
-        // Logo / Empresa (Left)
-        const logoUrl = document.getElementById('uLogo').value;
-        if(logoUrl) { try { doc.addImage(logoUrl, 'PNG', 15, 10, 35, 35); } catch(e) { doc.setTextColor(30,41,59); doc.setFontSize(22); doc.text(c, 15, 25); } }
-        else { doc.setTextColor(30, 41, 59); doc.setFontSize(22); doc.setFont(undefined, 'bold'); doc.text(c || "COMPANY", 15, 25); }
+        // Logo
+        if(base64Logo) { try { doc.addImage(base64Logo, 'PNG', 15, 10, 35, 35); } catch(e) {} }
+        else { doc.setTextColor(30,41,59); doc.setFontSize(22); doc.setFont(undefined, 'bold'); doc.text(c || "COMPANY", 15, 25); }
 
-        // Invoice Info (Right)
-        doc.setTextColor(255, 255, 255); doc.setFontSize(24); doc.text("INVOICE", 120, 20);
-        doc.setFontSize(8); doc.setFont(undefined, 'normal');
-        doc.text(`Invoice no: ${invNum}`, 120, 30);
-        doc.text(`Invoice Date: ${new Date().toLocaleDateString()}`, 120, 35);
-        doc.text(`Bank: ${document.getElementById('bName').value}`, 120, 43);
-        doc.text(`Acc: ${document.getElementById('bAcc').value}`, 120, 48);
-        doc.text(`PayPal: ${document.getElementById('bPaypal').value}`, 120, 53);
+        // Right Info Block
+        doc.setTextColor(255, 255, 255); doc.setFontSize(26); doc.setFont(undefined, 'bold'); doc.text("INVOICE", 125, 25);
+        doc.setFontSize(9); doc.setFont(undefined, 'normal');
+        doc.text(`Invoice no: ${invNum}`, 125, 35);
+        doc.text(`Invoice Date: ${new Date().toLocaleDateString('en-US')}`, 125, 40);
+        
+        doc.setFont(undefined, 'bold'); doc.text("Payment method:", 125, 48);
+        doc.setFont(undefined, 'normal');
+        doc.text(`Bank Name: ${document.getElementById('bName').value}`, 125, 53);
+        doc.text(`Acc Number: ${document.getElementById('bAcc').value}`, 125, 58);
+        doc.text(`PayPal/Zelle: ${document.getElementById('bPaypal').value}`, 125, 63);
 
         // Address Section
         doc.setTextColor(30, 41, 59); doc.setFontSize(10);
-        doc.setFont(undefined, 'bold'); doc.text("FROM:", 15, 75);
-        doc.setFont(undefined, 'normal'); doc.text(`${n}\n${uAddr}`, 15, 81);
+        doc.setFont(undefined, 'bold'); doc.text("FROM:", 15, 80);
+        doc.setFont(undefined, 'normal'); doc.text(`${n}\n${uAddr}`, 15, 86);
         
-        doc.setFont(undefined, 'bold'); doc.text("INVOICE TO:", 120, 75);
-        doc.setFont(undefined, 'normal'); doc.text(`${c}\n${cAddr}`, 120, 81);
+        doc.setFont(undefined, 'bold'); doc.text("INVOICE TO:", 120, 80);
+        doc.setFont(undefined, 'normal'); doc.text(`${c}\n${cAddr}`, 120, 86);
 
         // Due Total
-        doc.setFillColor(235, 235, 235); doc.rect(15, 100, 60, 12, 'F');
-        doc.setFont(undefined, 'bold'); doc.text(`Due Total: $ ${totalG.toFixed(2)}`, 20, 108);
+        doc.setFillColor(235, 235, 235); doc.rect(15, 105, 75, 12, 'F');
+        doc.setFont(undefined, 'bold'); doc.setFontSize(12); doc.text(`Due Total: $ ${totalG.toFixed(2)}`, 20, 113);
 
         // Table
         doc.autoTable({
             head: [['Date', 'Hours', 'Overtime', 'Total']],
             body: db.map(x=>[x.d, Math.floor(x.m/60)+"h "+(x.m%60)+"m", Math.floor(x.ot/60)+"h", "$ "+x.g.toFixed(2)]),
-            startY: 120, theme: 'striped', headStyles: {fillColor: [30, 41, 59]}
+            startY: 125, theme: 'striped', headStyles: {fillColor: [30, 41, 59], halign: 'center'},
+            columnStyles: { 0: {halign: 'left'}, 1: {halign: 'center'}, 2: {halign: 'center'}, 3: {halign: 'right'} }
         });
 
-        // Sign Block
+        // Sign
         const finalY = doc.lastAutoTable.finalY + 30;
         if(finalY > 260) doc.addPage();
         doc.setDrawColor(200); doc.line(130, finalY, 190, finalY);
         doc.setFontSize(10); doc.text("Accounting Manager", 135, finalY + 7);
-        
-        // Brand
         doc.setFontSize(8); doc.setTextColor(150); doc.text("Developed & Powered By : Isaqueavlis", 80, 290);
 
         invNum++; localStorage.setItem('inv_num', invNum);
@@ -269,7 +272,6 @@
         document.getElementById('uN').value = localStorage.getItem('u_n') || '';
         document.getElementById('uC').value = localStorage.getItem('u_c') || '';
         document.getElementById('uR').value = localStorage.getItem('u_r') || '';
-        document.getElementById('uLogo').value = localStorage.getItem('u_logo') || '';
         document.getElementById('uAddr').value = localStorage.getItem('u_addr') || '';
         document.getElementById('cAddr').value = localStorage.getItem('c_addr') || '';
         document.getElementById('bName').value = localStorage.getItem('b_name') || '';
