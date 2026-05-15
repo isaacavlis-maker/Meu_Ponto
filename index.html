@@ -3,153 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Timesheet Pro</title>
+    <title>Timesheet Pro Platinum - Isaque Edition</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
     <style>
-        :root { --accent: #4f46e5; --bg: #f1f5f9; --text: #1e293b; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; }
-        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; }
-        header { background: #1e293b; color: white; padding: 20px; border-radius: 15px; margin-bottom: 15px; text-align: center; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-        button { background: var(--accent); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
-        .tab-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        .tab-btn { flex: 1; padding: 10px; border-radius: 10px; border: none; background: #ddd; font-weight: bold; }
-        .tab-btn.active { background: var(--accent); color: white; }
-        .panel { display: none; } .panel.active { display: block; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
-        th, td { text-align: left; padding: 10px; border-bottom: 1px solid #eee; }
-        footer { text-align: center; margin-top: 30px; font-weight: 900; color: var(--text); opacity: 0.6; }
+        :root {
+            --primary: #4f46e5;
+            --overtime: #f59e0b;
+            --bg: #0f172a;
+            --surface: #ffffff;
+            --text-dark: #1e293b;
+            --text-sub: #64748b;
+            --success: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, system-ui, sans-serif; }
+        
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; color: white; text-align: center;
+        }
+        .splash-card {
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px);
+            padding: 30px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 85%; max-width: 400px;
+        }
+        .splash-img { width: 100px; height: 100px; border-radius: 20px; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        
+        body { background: #f1f5f9; color: var(--text-dark); display: none; padding: 15px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 20px; background: #1e293b;
+            padding: 20px; border-radius: 20px; color: white;
+        }
+
+        .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); margin-bottom: 15px; border: 1px solid #e2e8f0; }
+        .card-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; color: var(--text-sub); display: block;}
+
+        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .full-width { grid-column: span 2; }
+        
+        label { font-size: 0.65rem; font-weight: 800; color: var(--text-sub); text-transform: uppercase; margin-bottom: 5px; display: block; }
+        input, select { 
+            width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; 
+            background: #f8fafc; font-size: 1rem; outline: none;
+        }
+        input:focus { border-color: var(--primary); }
+
+        .tabs { display: flex; gap: 8px; background: #e2e8f0; padding: 5px; border-radius: 15px; margin-bottom: 15px; }
+        .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; color: var(--text-sub); background: transparent; transition: 0.3s; }
+        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        .btn-action { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
+        .btn-excel { background: #10b981; }
+        .btn-pdf { background: #ef4444; }
+
+        .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .kpi-box { background: white; padding: 20px; border-radius: 20px; border-left: 5px solid var(--primary); }
+        .kpi-val { font-size: 1.5rem; font-weight: 900; margin-top: 5px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; padding: 10px; font-size: 0.65rem; color: var(--text-sub); text-transform: uppercase; border-bottom: 2px solid #f1f5f9; }
+        td { padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; }
+        .ot-tag { background: #fef3c7; color: #d97706; padding: 2px 6px; border-radius: 5px; font-weight: 800; font-size: 0.7rem; }
+
+        footer { text-align: center; margin-top: 30px; border-top: 1px solid #e2e8f0; padding: 20px; }
+        .isaque-sig { font-weight: 900; color: var(--text-dark); letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
-<header>
-    <h1 style="margin:0; font-size: 1.2rem;">Timesheet Pro</h1>
-    <div id="data-atual" style="font-size: 0.8rem; opacity: 0.7;"></div>
-</header>
-
-<div class="card">
-    <label>Language / Idioma</label>
-    <select id="lang" onchange="changeLang()">
-        <option value="en">English (US)</option>
-        <option value="pt">Português (BR)</option>
-        <option value="es">Español (ES)</option>
-    </select>
+<div id="splash-screen">
+    <div class="splash-card">
+        <img src="icon.png" class="splash-img" alt="Logo">
+        <h2 style="margin-bottom: 10px;">Timesheet Pro</h2>
+        <p style="font-size: 0.8rem; opacity: 0.7;">Select Language / Selecione o Idioma</p>
+        <select id="lang-select" style="margin: 20px 0;">
+            <option value="en">English (US)</option>
+            <option value="pt">Português (BR)</option>
+            <option value="es">Español (ES)</option>
+        </select>
+        <button class="btn-action" onclick="startApp()">START / INICIAR</button>
+    </div>
+    <p style="margin-top: 20px; font-size: 0.7rem; opacity: 0.5;">v7.1 Platinum - Isaque Professional</p>
 </div>
 
-<div class="tab-group">
-    <button id="t1" class="tab-btn active" onclick="tab('lancar')">ENTRY</button>
-    <button id="t2" class="tab-btn" onclick="tab('resumo')">REPORT</button>
-</div>
-
-<div id="p-lancar" class="panel active">
-    <div class="card">
-        <input type="text" id="nome" placeholder="Your Name / Seu Nome">
-        <input type="date" id="data">
-        <div style="display: flex; gap: 10px;">
-            <input type="time" id="in">
-            <input type="time" id="out">
+<div class="container" id="main-app">
+    <header>
+        <div>
+            <h1 style="font-size: 1.2rem;" id="h-title">Time Tracker</h1>
+            <span id="h-sub" style="font-size: 0.6rem; opacity: 0.7; text-transform: uppercase; font-weight: bold;">Isaque Edition</span>
         </div>
-        <input type="number" id="rate" placeholder="Hourly Rate (US$)">
-        <button onclick="salvar()">SAVE / SALVAR</button>
-    </div>
-    <div class="card" style="overflow-x: auto;">
-        <table id="tabela">
-            <thead><tr><th>Date</th><th>Hrs</th><th>Pay</th><th>X</th></tr></thead>
-            <tbody id="corpo"></tbody>
-        </table>
-    </div>
-</div>
+        <div style="text-align: right;">
+            <div id="relogio" style="font-size: 1.1rem; font-weight: 900;">00:00:00</div>
+        </div>
+    </header>
 
-<div id="p-resumo" class="panel">
     <div class="card">
-        <h3 id="txt-total">Month Total:</h3>
-        <div id="total-val" style="font-size: 2rem; font-weight: 900; color: var(--accent);">00:00</div>
-        <div id="total-money" style="font-size: 1.2rem; color: #10b981; font-weight: bold;">$ 0.00</div>
+        <span class="card-title" id="t-profile">Profile & Company</span>
+        <div class="grid-inputs">
+            <div class="input-group full-width">
+                <label id="l-name">Name</label>
+                <input type="text" id="userName" placeholder="..." class="nav-in">
+            </div>
+            <div class="input-group">
+                <label id="l-comp">Company</label>
+                <input type="text" id="userComp" placeholder="..." class="nav-in">
+            </div>
+            <div class="input-group">
+                <label id="l-rate">Rate (US$)</label>
+                <input type="number" id="userRate" placeholder="0.00" class="nav-in">
+            </div>
+        </div>
     </div>
-    <button style="background: #10b981;" onclick="exportExcel()">EXCEL</button>
-</div>
 
-<footer>
-    MADE BY ISAQUE
-</footer>
+    <nav class="tabs">
+        <button id="tabL" class="tab-btn active" onclick="switchTab('lancar')">ENTRY</button>
+        <button id="tabR" class="tab-btn" onclick="switchTab('resumo')">REPORTS</button>
+    </nav>
+
+    <div id="p-lancar" class="panel active">
+        <div class="card">
+            <span class="card-title" id="t-new">New Entry</span>
+            <div class="grid-inputs">
+                <div class="input-group full-width"><label id="l-date">Date</label><input type="date" id="dt" class="nav-in"></div>
+                <div class="input-group"><label id="l-in">Clock In</label><input type="time" id="tin" class="nav-in"></div>
+                <div class="input-group"><label id="l-out">Clock Out</label><input type="time" id="tout" class="nav-in"></div>
+                <div class="input-group"><label id="l-l1">Lunch In</label><input type="time" id="lin" class="nav-in"></div>
+                <div class="input-group"><label id="l-l2">Lunch Out</label><input type="time" id="lout" class="nav-in"></div>
+            </div>
+            <button class="btn-action" id="btn-save" onclick="salvar()">SAVE ENTRY</button>
+        </div>
+
+        <div class="card" style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th id="th-date">Date</th>
+                        <th id="th-total">Total</th>
+                        <th id="th-ot">Overtime</th>
+                        <th id="th-pay">Earnings</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="p-resumo" class="panel">
+        <div class="kpi-grid">
+            <div class="kpi-box">
+                <div class="kpi-label" id="k-total">Month Total</div>
+                <div class="kpi-val" id="val-total">00:00</div>
+                <div id="money-total" style="color: var(--success); font-weight: bold; font-size: 0.9rem;">$ 0.00</div>
+            </div>
+            <div class="kpi-box" style="border-left-color: var(--overtime);">
+                <div class="kpi-label" id="k-ot">Extra Hours</div>
+                <div class="kpi-val" id="val-ot" style="color: var(--overtime);">00:00</div>
+            </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+            <button class="btn-action btn-excel" id="btn-excel" onclick="exportExcel()">EXCEL</button>
+            <button class="btn-action btn-pdf" id="btn-pdf" onclick="exportPDF()">PDF</button>
+        </div>
+    </div>
+
+    <footer>
+        <p class="isaque-sig">FEITO POR ISAQUE / MADE BY ISAQUE / HECHO POR ISAQUE</p>
+    </footer>
+</div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('db_isaque')) || [];
+    let registros = JSON.parse(localStorage.getItem('isaque_db_v7_1')) || [];
+    let currentLang = 'en';
 
-    window.onload = () => {
-        document.getElementById('data').value = new Date().toISOString().split('T')[0];
-        document.getElementById('data-atual').innerText = new Date().toLocaleDateString();
-        document.getElementById('nome').value = localStorage.getItem('user_n') || '';
-        document.getElementById('rate').value = localStorage.getItem('user_r') || '';
-        render();
+    const dic = {
+        en: { h_title: "Time Tracker", t_profile: "Profile & Company", l_name: "Name", l_comp: "Company", l_rate: "Rate (US$)", t_new: "New Entry", l_date: "Date", l_in: "Clock In", l_out: "Clock Out", l_l1: "Lunch Start", l_l2: "Lunch End", btn_save: "SAVE ENTRY", tabL: "ENTRY", tabR: "REPORTS", th_date: "Date", th_total: "Total", th_ot: "OT", th_pay: "Pay", k_total: "Month Total", k_ot: "Extra Hours", btn_excel: "EXCEL", btn_pdf: "PDF" },
+        pt: { h_title: "Controle de Ponto", t_profile: "Perfil e Empresa", l_name: "Nome", l_comp: "Empresa", l_rate: "Valor Hora", t_new: "Novo Lançamento", l_date: "Data", l_in: "Entrada", l_out: "Saída", l_l1: "Início Almoço", l_l2: "Fim Almoço", btn_save: "SALVAR PONTO", tabL: "LANÇAR", tabR: "RESUMO", th_date: "Data", th_total: "Total", th_ot: "Extra", th_pay: "Ganho", k_total: "Total do Mês", k_ot: "Horas Extras", btn_excel: "EXCEL", btn_pdf: "PDF" },
+        es: { h_title: "Control de Horas", t_profile: "Perfil y Empresa", l_name: "Nombre", l_comp: "Empresa", l_rate: "Precio Hora", t_new: "Nuevo Registro", l_date: "Fecha", l_in: "Entrada", l_out: "Salida", l_l1: "Almuerzo", l_l2: "Fin Almuerzo", btn_save: "GUARDAR", tabL: "REGISTRO", tabR: "REPORTES", th_date: "Fecha", th_total: "Total", th_ot: "Extra", th_pay: "Pago", k_total: "Total Mes", k_ot: "Extras", btn_excel: "EXCEL", btn_pdf: "PDF" }
     };
 
-    function tab(p) {
-        document.querySelectorAll('.panel').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById('p-' + p).classList.add('active');
-        if(p === 'lancar') document.getElementById('t1').classList.add('active');
-        else { document.getElementById('t2').classList.add('active'); calcResumo(); }
+    function startApp() {
+        currentLang = document.getElementById('lang-select').value;
+        applyLang();
+        document.getElementById('splash-screen').style.display = 'none';
+        document.body.style.display = 'block';
     }
 
+    function applyLang() {
+        const t = dic[currentLang];
+        // Traduz textos fixos
+        Object.keys(t).forEach(id => { 
+            const el = document.getElementById(id);
+            if(el) el.innerText = t[id]; 
+        });
+        render(); // Atualiza a tabela com o novo idioma se necessário
+    }
+
+    window.onload = () => {
+        document.getElementById('dt').value = new Date().toISOString().split('T')[0];
+        document.getElementById('userName').value = localStorage.getItem('isq_n') || '';
+        document.getElementById('userComp').value = localStorage.getItem('isq_c') || '';
+        document.getElementById('userRate').value = localStorage.getItem('isq_r') || '';
+        setInterval(() => { document.getElementById('relogio').innerText = new Date().toLocaleTimeString(); }, 1000);
+        configNav();
+    };
+
+    function tToM(t) { if(!t) return 0; const [h, m] = t.split(':').map(Number); return h * 60 + m; }
+    function mToH(m) { return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`; }
+
     function salvar() {
-        const d = document.getElementById('data').value;
-        const i = document.getElementById('in').value;
-        const o = document.getElementById('out').value;
-        const r = parseFloat(document.getElementById('rate').value) || 0;
-
-        if(!d || !i || !o) return alert("Fill all! / Preencha tudo!");
-
-        const diff = (new Date('2000-01-01T' + o) - new Date('2000-01-01T' + i)) / 1000 / 60;
-        if(diff < 0) return alert("Invalid Time!");
-
-        const obj = { id: Date.now(), data: d, min: diff, pay: (diff/60)*r };
-        db = db.filter(x => x.data !== d);
-        db.push(obj);
+        const d = document.getElementById('dt').value;
+        const vh = parseFloat(document.getElementById('userRate').value) || 0;
         
-        localStorage.setItem('db_isaque', JSON.stringify(db));
-        localStorage.setItem('user_n', document.getElementById('nome').value);
-        localStorage.setItem('user_r', document.getElementById('rate').value);
-        
+        const total = (tToM(document.getElementById('tout').value) - tToM(document.getElementById('tin').value)) - (tToM(document.getElementById('lout').value) - tToM(document.getElementById('lin').value));
+        if(total < 0) return alert("Error in time calculation!");
+
+        const ot = Math.max(0, total - 480); // Base 8h
+        const ganho = (total / 60) * vh;
+
+        const obj = { id: Date.now(), data: d, total, ot, ganho, 
+                      nome: document.getElementById('userName').value, 
+                      empresa: document.getElementById('userComp').value };
+
+        registros = registros.filter(r => r.data !== d);
+        registros.push(obj);
+        localStorage.setItem('isaque_db_v7_1', JSON.stringify(registros));
+        localStorage.setItem('isq_n', obj.nome);
+        localStorage.setItem('isq_c', obj.empresa);
+        localStorage.setItem('isq_r', vh);
         render();
-        alert("Saved! / Salvo!");
+        alert(currentLang === 'pt' ? "Salvo!" : (currentLang === 'es' ? "Guardado!" : "Saved!"));
     }
 
     function render() {
-        const corpo = document.getElementById('corpo');
-        corpo.innerHTML = '';
-        db.sort((a,b) => b.data.localeCompare(a.data)).forEach(it => {
+        const body = document.getElementById('tbody');
+        body.innerHTML = '';
+        registros.sort((a,b) => b.data.localeCompare(a.data)).forEach(r => {
             const tr = document.createElement('tr');
-            const h = Math.floor(it.min/60);
-            const m = it.min%60;
-            tr.innerHTML = `<td>${it.data}</td><td>${h}:${m < 10 ? '0'+m : m}</td><td>$${it.pay.toFixed(2)}</td><td><button style="padding:5px; margin:0; background:red;" onclick="remover(${it.id})">X</button></td>`;
-            corpo.appendChild(tr);
+            tr.innerHTML = `<td>${r.data.split('-').reverse().join('/')}</td><td><b>${mToH(r.total)}</b></td><td><span class="${r.ot > 0 ? 'ot-tag' : ''}">${r.ot > 0 ? mToH(r.ot) : '--'}</span></td><td>$${r.ganho.toFixed(2)}</td><td><button onclick="remover(${r.id})" style="background:none; border:none; cursor:pointer;">❌</button></td>`;
+            body.appendChild(tr);
         });
     }
 
-    function remover(id) {
-        db = db.filter(x => x.id !== id);
-        localStorage.setItem('db_isaque', JSON.stringify(db));
-        render();
+    function switchTab(t) {
+        document.querySelectorAll('.panel, .tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('p-'+t).classList.add('active');
+        document.getElementById(t === 'lancar' ? 'tabL' : 'tabR').classList.add('active');
+        if(t === 'resumo') {
+            const sumM = registros.reduce((a,b) => a+b.total, 0);
+            const sumOT = registros.reduce((a,b) => a+b.ot, 0);
+            const sum$ = registros.reduce((a,b) => a+b.ganho, 0);
+            document.getElementById('val-total').innerText = mToH(sumM);
+            document.getElementById('val-ot').innerText = mToH(sumOT);
+            document.getElementById('money-total').innerText = "US$ " + sum$.toFixed(2);
+        }
     }
 
-    function calcResumo() {
-        const totalM = db.reduce((a, b) => a + b.min, 0);
-        const total$ = db.reduce((a, b) => a + b.pay, 0);
-        document.getElementById('total-val').innerText = Math.floor(totalM/60) + ":" + (totalM%60 < 10 ? '0'+totalM%60 : totalM%60);
-        document.getElementById('total-money').innerText = "US$ " + total$.toFixed(2);
+    function remover(id) { if(confirm("Delete?")) { registros = registros.filter(r => r.id !== id); localStorage.setItem('isaque_db_v7_1', JSON.stringify(registros)); render(); } }
+
+    function configNav() {
+        document.querySelectorAll('.nav-in').forEach((input, i, list) => {
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); if (i < list.length - 1) list[i + 1].focus(); else salvar(); } });
+        });
     }
 
     function exportExcel() {
-        const ws = XLSX.utils.json_to_sheet(db);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Ponto");
-        XLSX.writeFile(wb, "Timesheet_Isaque.xlsx");
+        const ws = XLSX.utils.json_to_sheet(registros.map(r => ({ Data: r.data, Total: mToH(r.total), Extra: mToH(r.ot), Ganho: r.ganho.toFixed(2) })));
+        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Ponto"); XLSX.writeFile(wb, "Timesheet_Isaque.xlsx");
+    }
+
+    function exportPDF() {
+        const { jsPDF } = window.jspdf; const doc = new jsPDF();
+        doc.text("REPORT - MADE BY ISAQUE", 14, 15);
+        doc.autoTable({ head: [['Date', 'Total', 'OT', 'Pay']], body: registros.map(r => [r.data, mToH(r.total), mToH(r.ot), "$"+r.ganho.toFixed(2)]) });
+        doc.save("Report_Isaque.pdf");
     }
 </script>
-
 </body>
 </html>
