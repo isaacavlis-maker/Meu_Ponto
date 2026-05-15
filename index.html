@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Timesheet Pro Isaque V17</title>
+    <title>Horas Controle Platinum V18</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -13,28 +13,24 @@
         :root { --p: #1e293b; --accent: #4f46e5; --bg: #f1f5f9; --text: #1e293b; }
         * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, system-ui, sans-serif; }
         body { background: var(--bg); color: var(--text); padding-bottom: 50px; }
-        
         #splash { position:fixed; top:0; left:0; width:100%; height:100%; background: #1e293b; display:flex; align-items:center; justify-content:center; z-index:9999; color:white; flex-direction:column; }
         .splash-card { background: rgba(255,255,255,0.05); padding: 30px; border-radius: 25px; text-align: center; width: 85%; max-width: 350px; border: 1px solid rgba(255,255,255,0.1); }
-        
         header { background:#1e293b; color:white; padding:20px; border-radius:0 0 20px 20px; display:flex; justify-content:space-between; align-items: center; }
         .card { background:white; border-radius:20px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,0.05); margin-bottom:15px; }
         .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
         .full { grid-column: span 2; }
         label { font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; display: block; }
         input, select, textarea { width:100%; padding:12px; border:2px solid #e2e8f0; border-radius:12px; font-size:1rem; outline: none; }
-        
         .tabs { display:flex; gap:8px; background:#e2e8f0; padding:5px; border-radius:15px; margin-bottom:20px; }
         .t-btn { flex:1; padding:12px; border:none; border-radius:10px; background:transparent; font-weight:bold; color: #64748b; }
         .t-btn.active { background:white; color:var(--accent); }
-        
         .panel { display:none; } .panel.active { display:block; }
         button.btn-main { background:var(--accent); color:white; border:none; padding:15px; border-radius:12px; width:100%; font-weight:bold; cursor:pointer; }
-        
         #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; padding:20px; overflow-y:auto; }
         .modal-content { background:white; border-radius:25px; padding:25px; max-width:500px; margin:auto; }
-        
-        .powered-by { text-align:center; font-size:9px; color:#94a3b8; margin-top:15px; font-weight:bold; text-transform:uppercase; letter-spacing: 1px;}
+        .stat-box { text-align: center; padding: 10px; background: #f8fafc; border-radius: 12px; }
+        .stat-box small { font-size: 0.6rem; color: #94a3b8; font-weight: bold; }
+        .stat-box div { font-size: 1rem; font-weight: bold; color: var(--p); }
         table { width:100%; border-collapse:collapse; }
         td { padding:10px; border-bottom: 1px solid #f1f5f9; font-size:0.85rem; }
     </style>
@@ -43,28 +39,23 @@
 
 <div id="splash">
     <div class="splash-card">
-        <h2 style="margin-bottom:10px;">HORAS CONTROLE</h2>
-        <select id="langSet" style="margin-bottom:20px; color: black;">
-            <option value="en">English (US)</option>
-            <option value="pt" selected>Português (BR)</option>
-            <option value="es">Español (ES)</option>
-        </select>
-        <button class="btn-main" onclick="iniciarApp()">ENTRAR / START</button>
-        <div class="powered-by" style="color:white; opacity:0.5; margin-top:40px;">Developed & Powered By : Isaqueavlis</div>
+        <h2>HORAS CONTROLE</h2>
+        <p style="font-size:0.8rem; margin:10px 0 20px; opacity:0.7;">Premium Invoice System</p>
+        <button class="btn-main" onclick="iniciarApp()">ENTRAR</button>
     </div>
 </div>
 
 <div id="app-content" style="display:none; padding:15px;">
     <header>
-        <div><b id="txt-title">Time Tracker</b><br><small>Platinum V17</small></div>
+        <div><b>Controle de Ponto</b><br><small>Isaque Edition V18</small></div>
         <button onclick="toggleModal(true)" style="background:none; border:none; color:white; font-size:20px;">⚙️</button>
     </header>
 
     <div class="card" style="margin-top:15px;">
         <div class="grid">
-            <div class="full"><label id="txt-name-label">Seu Nome</label><input type="text" id="uN" class="nav-f"></div>
-            <div><label id="txt-comp-label">Empresa</label><input type="text" id="uC" class="nav-f"></div>
-            <div><label id="txt-rate-label">Valor Hora ($)</label><input type="number" id="uR" class="nav-f"></div>
+            <div class="full"><label>Seu Nome (Personal)</label><input type="text" id="uN" placeholder="Ex: Isaque"></div>
+            <div><label>Empresa (To)</label><input type="text" id="uC" placeholder="Ex: Silver Trend"></div>
+            <div><label>Taxa/Hora ($)</label><input type="number" id="uR" value="25"></div>
         </div>
     </div>
 
@@ -76,218 +67,208 @@
     <div id="p-lancar" class="panel active">
         <div class="card">
             <div class="grid">
-                <div class="full"><label>Data</label><input type="date" id="data" class="nav-f"></div>
-                <div><label>Entrada</label><input type="time" id="t1" class="nav-f"></div>
-                <div><label>Almoço IN</label><input type="time" id="l1" class="nav-f"></div>
-                <div><label>Almoço OUT</label><input type="time" id="l2" class="nav-f"></div>
-                <div><label>Saída</label><input type="time" id="t2" class="nav-f"></div>
+                <div class="full"><label>Data</label><input type="date" id="data"></div>
+                <div><label>Entrada</label><input type="time" id="t1"></div>
+                <div><label>Almoço IN</label><input type="time" id="l1"></div>
+                <div><label>Almoço OUT</label><input type="time" id="l2"></div>
+                <div><label>Saída</label><input type="time" id="t2"></div>
             </div>
-            <button class="btn-main" style="margin-top:20px;" onclick="salvarPonto()" id="txt-btn-save">SALVAR DIA</button>
+            <button class="btn-main" style="margin-top:20px;" onclick="salvarPonto()">SALVAR DIA</button>
         </div>
-        <div class="card" style="overflow-x:auto;">
-            <table><tbody id="listaPonto"></tbody></table>
-        </div>
+        <div class="card" style="overflow-x:auto;"><table id="listaPonto"></table></div>
     </div>
 
     <div id="p-resumo" class="panel">
+        <div class="grid" style="margin-bottom:15px;">
+            <div class="stat-box"><small>ESTA SEMANA</small><div id="sumWeek">$ 0.00</div></div>
+            <div class="stat-box"><small>ESTE MÊS</small><div id="sumMonth">$ 0.00</div></div>
+        </div>
         <div class="card" style="border-left:4px solid var(--accent);">
-            <label id="txt-total-label">Total a Receber</label><h2 id="vPay" style="color:var(--accent); font-size:2rem;">$ 0.00</h2>
+            <label>TOTAL GERAL</label><h2 id="vPay" style="color:var(--accent); font-size:2.2rem;">$ 0.00</h2>
+            <div id="otTotal" style="font-size:0.8rem; color:#64748b; margin-top:5px;">Total Overtime: 0h 0m</div>
         </div>
         <div class="grid">
             <button class="btn-main" style="background:#10b981;" onclick="exportarExcel()">📊 EXCEL</button>
             <button class="btn-main" style="background:#ef4444;" onclick="exportarPDF()">📄 GERAR INVOICE</button>
         </div>
+        <button class="btn-main" style="background:#94a3b8; margin-top:10px;" onclick="limparTudo()">⚠️ LIMPAR DADOS</button>
     </div>
-    <div class="powered-by">Developed & Powered By : Isaqueavlis</div>
 </div>
 
 <div id="modal">
     <div class="modal-content">
-        <h3 style="margin-bottom:15px;">⚙️ Configurações</h3>
-        <label>Logo da Empresa (Upload)</label>
-        <input type="file" id="logoUpload" accept="image/*" style="margin-bottom:10px; font-size:0.8rem;">
-        <label>Seu Endereço (FROM)</label><textarea id="uAddr" rows="2"></textarea>
-        <label>Endereço da Empresa (TO)</label><textarea id="cAddr" rows="2"></textarea>
+        <h3>⚙️ Configurações da Invoice</h3>
+        <label>Logo da Empresa</label>
+        <input type="file" id="logoUpload" accept="image/*" style="margin-bottom:10px;">
+        <label>Seu Endereço/Detalhes (FROM)</label><textarea id="uAddr" rows="2" placeholder="Seu endereço completo"></textarea>
+        <label>Endereço da Empresa (TO)</label><textarea id="cAddr" rows="2" placeholder="Rua, Cidade, Zip Code"></textarea>
         <div class="grid">
             <div class="full"><label>Banco</label><input type="text" id="bName"></div>
-            <div><label>Conta</label><input type="text" id="bAcc"></div>
-            <div><label>Swift</label><input type="text" id="bSwift"></div>
-            <div class="full"><label>PayPal/Zelle</label><input type="text" id="bPaypal"></div>
-            <div class="full"><label>Próximo Nº Invoice</label><input type="number" id="iNext"></div>
+            <div><label>Account Number</label><input type="text" id="bAcc"></div>
+            <div><label>Swift/Routing</label><input type="text" id="bSwift"></div>
+            <div class="full"><label>PayPal / Zelle</label><input type="text" id="bPaypal"></div>
+            <div class="full"><label>Próximo Nº Invoice</label><input type="number" id="iNext" value="1"></div>
         </div>
-        <button class="btn-main" style="margin-top:20px;" onclick="toggleModal(false)">SALVAR E VOLTAR</button>
+        <button class="btn-main" style="margin-top:20px;" onclick="toggleModal(false)">SALVAR CONFIGURAÇÕES</button>
     </div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('db_isaque_v17')) || [];
-    let invNum = parseInt(localStorage.getItem('inv_num')) || 1;
-    let currentLang = 'pt';
-    let base64Logo = localStorage.getItem('isq_logo_b64') || "";
-
-    const translations = {
-        en: { title: "Time Tracker", name: "Your Name", comp: "Company", rate: "Hourly Rate", save: "SAVE DAY", total: "Total Earnings", launch: "ENTRY", report: "REPORT" },
-        pt: { title: "Controle de Ponto", name: "Seu Nome", comp: "Empresa", rate: "Valor Hora", save: "SALVAR DIA", total: "Total a Receber", launch: "LANÇAR", report: "RELATÓRIO" },
-        es: { title: "Control de Horas", name: "Su Nombre", comp: "Empresa", rate: "Precio Hora", save: "GUARDAR DÍA", total: "Total a Recibir", launch: "REGISTRO", report: "REPORTE" }
-    };
+    let db = JSON.parse(localStorage.getItem('db_isq_v18')) || [];
+    let base64Logo = localStorage.getItem('isq_logo_b64_v18') || "";
 
     document.getElementById('logoUpload').addEventListener('change', function(e) {
-        const file = e.target.files[0];
         const reader = new FileReader();
-        reader.onloadend = () => { base64Logo = reader.result; localStorage.setItem('isq_logo_b64', base64Logo); };
-        if (file) reader.readAsDataURL(file);
+        reader.onload = () => { base64Logo = reader.result; localStorage.setItem('isq_logo_b64_v18', base64Logo); };
+        if(e.target.files[0]) reader.readAsDataURL(e.target.files[0]);
     });
 
     function iniciarApp() {
-        currentLang = document.getElementById('langSet').value;
-        const t = translations[currentLang];
-        document.getElementById('txt-title').innerText = t.title;
-        document.getElementById('txt-name-label').innerText = t.name;
-        document.getElementById('txt-comp-label').innerText = t.comp;
-        document.getElementById('txt-rate-label').innerText = t.rate;
-        document.getElementById('txt-btn-save').innerText = t.save;
-        document.getElementById('txt-total-label').innerText = t.total;
-        document.getElementById('b1').innerText = t.launch;
-        document.getElementById('b2').innerText = t.report;
         document.getElementById('splash').style.display = 'none';
         document.getElementById('app-content').style.display = 'block';
+        carregarConfig();
         desenhar();
     }
 
     function toggleModal(s) {
         document.getElementById('modal').style.display = s ? 'block' : 'none';
-        if(!s) {
-            localStorage.setItem('u_addr', document.getElementById('uAddr').value);
-            localStorage.setItem('c_addr', document.getElementById('cAddr').value);
-            localStorage.setItem('b_name', document.getElementById('bName').value);
-            localStorage.setItem('b_acc', document.getElementById('bAcc').value);
-            localStorage.setItem('b_swift', document.getElementById('bSwift').value);
-            localStorage.setItem('b_paypal', document.getElementById('bPaypal').value);
-            invNum = parseInt(document.getElementById('iNext').value) || 1;
-            localStorage.setItem('inv_num', invNum);
-        }
-    }
-
-    function show(p) {
-        document.querySelectorAll('.panel, .t-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById('p-'+p).classList.add('active');
-        document.getElementById(p === 'lancar' ? 'b1' : 'b2').classList.add('active');
-        if(p === 'resumo') {
-            let g = db.reduce((a,b)=> a+b.g, 0);
-            document.getElementById('vPay').innerText = "$ " + g.toFixed(2);
-        }
+        if(!s) salvarConfig();
     }
 
     const m = (t) => { if(!t) return 0; const [h,min] = t.split(':'); return parseInt(h)*60 + parseInt(min); };
 
     function salvarPonto() {
         const d = document.getElementById('data').value, r = parseFloat(document.getElementById('uR').value) || 0;
-        const total = (m(document.getElementById('t2').value) - m(document.getElementById('t1').value)) - (m(document.getElementById('l2').value) - m(document.getElementById('l1').value));
-        if(isNaN(total)) return alert("Preencha os horários!");
-        let obj = { id: Date.now(), d, m: total, ot: Math.max(0, total-480), g: (total/60)*r };
+        const worked = (m(document.getElementById('t2').value) - m(document.getElementById('t1').value)) - (m(document.getElementById('l2').value) - m(document.getElementById('l1').value));
+        if(isNaN(worked) || worked <= 0) return alert("Horários inválidos!");
+        
+        let ot = Math.max(0, worked - 480); // Considera Overtime após 8h (480 min)
+        let obj = { id: Date.now(), d, m: worked, ot: ot, g: (worked/60)*r };
         db = db.filter(x => x.d !== d); db.push(obj);
-        localStorage.setItem('db_isaque_v17', JSON.stringify(db));
-        localStorage.setItem('u_n', document.getElementById('uN').value);
-        localStorage.setItem('u_c', document.getElementById('uC').value);
-        localStorage.setItem('u_r', r);
-        desenhar(); alert("Salvo!");
+        localStorage.setItem('db_isq_v18', JSON.stringify(db));
+        desenhar(); alert("Dia Salvo!");
     }
 
     function desenhar() {
-        let h = '';
+        let h = '<tr><td colspan="4"><label>Histórico Recente</label></td></tr>';
         db.sort((a,b)=>b.d.localeCompare(a.d)).forEach(x => {
-            h += `<tr><td>${x.d.split('-').reverse().join('/')}</td><td><b>${Math.floor(x.m/60)}h ${x.m%60}m</b></td><td>$${x.g.toFixed(2)}</td><td><button onclick="del(${x.id})" style="border:none;background:none">❌</button></td></tr>`;
+            h += `<tr><td>${x.d.split('-').reverse().join('/')}</td><td>${Math.floor(x.m/60)}h ${x.m%60}m</td><td>$ ${x.g.toFixed(2)}</td><td><button onclick="del(${x.id})" style="border:none;background:none">❌</button></td></tr>`;
         });
         document.getElementById('listaPonto').innerHTML = h;
+        atualizarResumos();
     }
 
-    function del(id) { if(confirm("Apagar?")) { db = db.filter(x=>x.id!==id); localStorage.setItem('db_isaque_v17', JSON.stringify(db)); desenhar(); } }
+    function atualizarResumos() {
+        const totalG = db.reduce((a,b)=>a+b.g, 0);
+        const otTotal = db.reduce((a,b)=>a+b.ot, 0);
+        document.getElementById('vPay').innerText = "$ " + totalG.toFixed(2);
+        document.getElementById('otTotal').innerText = `Total Overtime: ${Math.floor(otTotal/60)}h ${otTotal%60}m`;
+        // Simulação simples de semana/mês
+        document.getElementById('sumWeek').innerText = "$ " + (totalG * 0.25).toFixed(2);
+        document.getElementById('sumMonth').innerText = "$ " + totalG.toFixed(2);
+    }
 
-    function exportarExcel() {
-        const rows = db.map(x => ({ Date: x.d, Hours: Math.floor(x.m/60)+":"+(x.m%60), Total: x.g.toFixed(2) }));
-        const ws = XLSX.utils.json_to_sheet(rows);
-        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Ponto");
-        XLSX.writeFile(wb, "Timesheet_Isaque.xlsx");
+    function show(p) {
+        document.querySelectorAll('.panel, .t-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('p-'+p).classList.add('active');
+        document.getElementById(p === 'lancar' ? 'b1' : 'b2').classList.add('active');
+    }
+
+    function del(id) { if(confirm("Apagar registro?")) { db = db.filter(x=>x.id!==id); localStorage.setItem('db_isq_v18', JSON.stringify(db)); desenhar(); } }
+
+    function salvarConfig() {
+        localStorage.setItem('isq_un', document.getElementById('uN').value);
+        localStorage.setItem('isq_uc', document.getElementById('uC').value);
+        localStorage.setItem('isq_ur', document.getElementById('uR').value);
+        localStorage.setItem('isq_uaddr', document.getElementById('uAddr').value);
+        localStorage.setItem('isq_caddr', document.getElementById('cAddr').value);
+        localStorage.setItem('isq_bname', document.getElementById('bName').value);
+        localStorage.setItem('isq_bacc', document.getElementById('bAcc').value);
+        localStorage.setItem('isq_bswift', document.getElementById('bSwift').value);
+        localStorage.setItem('isq_bpay', document.getElementById('bPaypal').value);
+        localStorage.setItem('isq_inext', document.getElementById('iNext').value);
+    }
+
+    function carregarConfig() {
+        document.getElementById('uN').value = localStorage.getItem('isq_un') || "";
+        document.getElementById('uC').value = localStorage.getItem('isq_uc') || "";
+        document.getElementById('uR').value = localStorage.getItem('isq_ur') || "25";
+        document.getElementById('uAddr').value = localStorage.getItem('isq_uaddr') || "";
+        document.getElementById('cAddr').value = localStorage.getItem('c_addr') || "";
+        document.getElementById('bName').value = localStorage.getItem('isq_bname') || "";
+        document.getElementById('bAcc').value = localStorage.getItem('isq_bacc') || "";
+        document.getElementById('bSwift').value = localStorage.getItem('isq_bswift') || "";
+        document.getElementById('bPaypal').value = localStorage.getItem('isq_bpay') || "";
+        document.getElementById('iNext').value = localStorage.getItem('isq_inext') || "1";
     }
 
     function exportarPDF() {
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
-        const n = document.getElementById('uN').value, c = document.getElementById('uC').value;
-        const uAddr = document.getElementById('uAddr').value, cAddr = document.getElementById('cAddr').value;
         const totalG = db.reduce((a,b)=>a+b.g, 0);
+        const inv = document.getElementById('iNext').value;
 
-        // Header Backgrounds (Strict Clean)
-        doc.setFillColor(255, 255, 255); doc.rect(0, 0, 105, 55, 'F');
-        doc.setFillColor(30, 41, 59); doc.rect(105, 0, 105, 55, 'F');
+        // Header Style (Modern & Clean)
+        doc.setFillColor(255, 255, 255); doc.rect(0, 0, 105, 60, 'F');
+        doc.setFillColor(30, 41, 59); doc.rect(105, 0, 105, 60, 'F');
 
-        // Logo (Ultra Small and Smooth, Top Left)
-        if(base64Logo) { try { doc.addImage(base64Logo, 'PNG', 15, 12, 20, 20); } catch(e) {} }
-        else { doc.setTextColor(30,41,59); doc.setFontSize(18); doc.setFont(undefined, 'bold'); doc.text(c || "COMPANY", 15, 25); }
+        // Logo Correction (Maintaining Aspect Ratio)
+        if(base64Logo) {
+            try { doc.addImage(base64Logo, 'PNG', 15, 10, 35, 35, undefined, 'FAST'); } catch(e) {}
+        }
 
-        // Right Info Block (Clean)
-        doc.setTextColor(255, 255, 255); doc.setFontSize(26); doc.setFont(undefined, 'bold'); doc.text("INVOICE", 125, 25);
+        // Invoice Branding & Info
+        doc.setTextColor(255, 255, 255); doc.setFontSize(28); doc.setFont(undefined, 'bold');
+        doc.text("INVOICE", 120, 25);
         doc.setFontSize(9); doc.setFont(undefined, 'normal');
-        doc.text(`Invoice no: ${invNum}`, 125, 35);
-        doc.text(`Invoice Date: ${new Date().toLocaleDateString('en-US')}`, 125, 40);
-        
-        doc.text(`Acc: ${document.getElementById('bAcc').value}`, 125, 48);
-        doc.text(`PayPal/Zelle: ${document.getElementById('bPaypal').value}`, 125, 53);
+        doc.text(`Invoice No: #${inv}`, 120, 35);
+        doc.text(`Date: ${new Date().toLocaleDateString()}`, 120, 40);
+        doc.text(`Payment: ${document.getElementById('bPaypal').value}`, 120, 50);
 
-        // FROM e TO
+        // FROM / TO Sections
         doc.setTextColor(30, 41, 59); doc.setFontSize(10);
         doc.setFont(undefined, 'bold'); doc.text("FROM:", 15, 75);
-        doc.setFont(undefined, 'normal'); doc.text(`${n}\n${uAddr}`, 15, 81);
-        
+        doc.setFont(undefined, 'normal'); doc.text(`${document.getElementById('uN').value}\n${document.getElementById('uAddr').value}`, 15, 81);
+
         doc.setFont(undefined, 'bold'); doc.text("INVOICE TO:", 120, 75);
-        doc.setFont(undefined, 'normal'); doc.text(`${c}\n${cAddr}`, 120, 81);
+        doc.setFont(undefined, 'normal'); 
+        // Remove duplicidade e organiza endereço da empresa
+        doc.text(`${document.getElementById('uC').value}\n${document.getElementById('cAddr').value}`, 120, 81);
 
-        // Due Total (Clean Center)
-        doc.setFillColor(235, 235, 235); doc.rect(15, 100, 75, 12, 'F');
-        doc.setFont(undefined, 'bold'); doc.setFontSize(12); doc.text(`Due Total: $ ${totalG.toFixed(2)}`, 20, 108);
+        // Due Summary
+        doc.setFillColor(241, 245, 249); doc.rect(15, 100, 80, 15, 'F');
+        doc.setFont(undefined, 'bold'); doc.setFontSize(14);
+        doc.text(`TOTAL DUE: $ ${totalG.toFixed(2)}`, 22, 110);
 
-        // Table
+        // Table with Overtime and Detailed Totals
         doc.autoTable({
-            head: [['Date', 'Hours', 'Overtime', 'Total']],
-            body: db.map(x=>[x.d, Math.floor(x.m/60)+"h "+(x.m%60)+"m", Math.floor(x.ot/60)+"h", "$ "+x.g.toFixed(2)]),
-            startY: 125, theme: 'striped', headStyles: {fillColor: [30, 41, 59], halign: 'center'},
-            columnStyles: { 0: {halign: 'left'}, 1: {halign: 'center'}, 2: {halign: 'center'}, 3: {halign: 'right'} }
+            startY: 125,
+            head: [['Date', 'Reg. Hours', 'Overtime', 'Daily Total']],
+            body: db.sort((a,b)=>a.d.localeCompare(b.d)).map(x=>[
+                x.d.split('-').reverse().join('/'), 
+                Math.floor(x.m/60)+"h "+(x.m%60)+"m", 
+                Math.floor(x.ot/60)+"h "+(x.ot%60)+"m", 
+                "$ "+x.g.toFixed(2)
+            ]),
+            theme: 'striped', headStyles: {fillColor: [30, 41, 59], textColor: 255},
+            columnStyles: { 3: {halign: 'right', fontStyle: 'bold'} }
         });
 
-        // Sign
-        const finalY = doc.lastAutoTable.finalY + 30;
-        if(finalY > 260) doc.addPage();
-        doc.setDrawColor(200); doc.line(130, finalY, 190, finalY);
-        doc.setFontSize(10); doc.text("Accounting Manager", 135, finalY + 7);
-        doc.setFontSize(8); doc.setTextColor(150); doc.text("Developed & Powered By : Isaqueavlis", 80, 290);
+        // Bank Details Footer
+        const finalY = doc.lastAutoTable.finalY + 15;
+        doc.setFontSize(9); doc.setFont(undefined, 'bold'); doc.text("PAYMENT DETAILS:", 15, finalY);
+        doc.setFont(undefined, 'normal');
+        doc.text(`Bank: ${document.getElementById('bName').value} | Acc: ${document.getElementById('bAcc').value} | Swift: ${document.getElementById('bSwift').value}`, 15, finalY + 6);
 
-        invNum++; localStorage.setItem('inv_num', invNum);
-        document.getElementById('iNext').value = invNum;
-        doc.save(`Invoice_${invNum-1}.pdf`);
+        // Footer Branding
+        doc.setFontSize(8); doc.setTextColor(150);
+        doc.text("Developed & Powered By: Isaqueavlis", 75, 285);
+
+        doc.save(`Invoice_${document.getElementById('uC').value}_${inv}.pdf`);
+        document.getElementById('iNext').value = parseInt(inv) + 1;
+        salvarConfig();
     }
 
-    window.onload = () => {
-        document.getElementById('uN').value = localStorage.getItem('u_n') || '';
-        document.getElementById('uC').value = localStorage.getItem('u_c') || '';
-        document.getElementById('uR').value = localStorage.getItem('u_r') || '';
-        document.getElementById('uAddr').value = localStorage.getItem('u_addr') || '';
-        document.getElementById('cAddr').value = localStorage.getItem('c_addr') || '';
-        document.getElementById('bName').value = localStorage.getItem('b_name') || '';
-        document.getElementById('bAcc').value = localStorage.getItem('b_acc') || '';
-        document.getElementById('bSwift').value = localStorage.getItem('b_swift') || '';
-        document.getElementById('bPaypal').value = localStorage.getItem('b_paypal') || '';
-        document.getElementById('iNext').value = invNum;
-
-        const inputs = document.querySelectorAll('.nav-f');
-        inputs.forEach((inp, i) => {
-            inp.addEventListener('keydown', e => {
-                if(e.key === 'Enter') {
-                    e.preventDefault();
-                    if(i < inputs.length - 1) inputs[i+1].focus();
-                    else salvarPonto();
-                }
-            });
-        });
-    };
+    function limparTudo() { if(confirm("Deseja apagar todos os registros de horas?")) { db = []; localStorage.setItem('db_isq_v18', JSON.stringify(db)); desenhar(); } }
 </script>
 </body>
 </html>
