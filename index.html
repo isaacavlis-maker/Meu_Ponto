@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Timesheet Pro Isaque V27</title>
+    <title>Timesheet Pro Isaque V28</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -20,10 +20,13 @@
         
         header { background:#1e293b; color:white; padding:20px; border-radius:0 0 20px 20px; display:flex; justify-content:space-between; align-items: center; margin-bottom:15px; }
         .card { background:white; border-radius:20px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,0.05); margin-bottom:15px; border: 1px solid #e2e8f0; }
+        
+        /* Ajuste de Grid Inteligente para Celulares */
         .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
         .full { grid-column: span 2; }
+        
         label { font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; display: block; }
-        input, select, textarea { width:100%; padding:12px; border:2px solid #e2e8f0; border-radius:12px; font-size:1rem; outline: none; background: #f8fafc; }
+        input, select, textarea { width:100%; padding:12px; border:2px solid #e2e8f0; border-radius:12px; font-size:1rem; outline: none; background: #f8fafc; -webkit-appearance: none; }
         
         /* Botões 3D Suaves */
         .btn-3d { 
@@ -31,6 +34,7 @@
             color: white; border: none; padding: 15px; border-radius: 12px; 
             font-weight: bold; cursor: pointer; width: 100%;
             box-shadow: 0 4px 0 #312e81; transition: all 0.1s;
+            text-align: center;
         }
         .btn-3d:active { transform: translateY(3px); box-shadow: 0 1px 0 #312e81; }
 
@@ -43,10 +47,19 @@
         .modal-content { background:white; border-radius:25px; padding:25px; max-width:500px; margin:auto; }
         
         table { width:100%; border-collapse:collapse; }
-        td { padding:10px; border-bottom: 1px solid #f1f5f9; font-size:0.85rem; }
-        .powered-by { text-align:center; font-size:9px; color:#94a3b8; margin-top:15px; font-weight:bold; text-transform:uppercase; }
+        td { padding:12px 10px; border-bottom: 1px solid #f1f5f9; font-size:0.85rem; }
+        .powered-by { text-align:center; font-size:9px; color:#94a3b8; margin-top:25px; font-weight:bold; text-transform:uppercase; }
         
         .sub-lbl { font-size: 0.75rem; color:#64748b; font-weight:bold; margin-top:5px; display:block; }
+
+        /* REGRA ADICIONAL PARA CELULAR (DA OUTRA CARA AO MOBILE) */
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: 1fr; gap: 10px; }
+            .full { grid-column: span 1; }
+            .card { padding: 15px; margin-bottom: 10px; }
+            header { padding: 15px; }
+            input, select, textarea { padding: 10px; font-size: 0.95rem; }
+        }
     </style>
 </head>
 <body>
@@ -60,14 +73,14 @@
             <option value="es">Español (ES)</option>
         </select>
         <button class="btn-3d" onclick="iniciarApp()">ENTRAR / START</button>
-        <div class="powered-by" style="color:white; opacity:0.5;">Developed & Powered By : Isaqueavlis</div>
+        <div class="powered-by" style="color:white; opacity:0.5; margin-top: 20px;">Developed & Powered By : Isaqueavlis</div>
     </div>
 </div>
 
 <div id="app-content" style="display:none; padding:15px;">
     <header>
-        <div><b id="txt-title">Time Tracker</b><br><small>Platinum V27</small></div>
-        <button onclick="toggleModal(true)" style="background:rgba(255,255,255,0.1); border:none; color:white; padding:8px; border-radius:10px;">⚙️</button>
+        <div><b id="txt-title">Time Tracker</b><br><small>Platinum V28</small></div>
+        <button onclick="toggleModal(true)" style="background:rgba(255,255,255,0.1); border:none; color:white; padding:8px; border-radius:10px; font-size: 1rem;">⚙️</button>
     </header>
 
     <div class="card">
@@ -128,7 +141,7 @@
 
 <div id="modal">
     <div class="modal-content">
-        <h3>⚙️ Invoice Settings</h3>
+        <h3 style="margin-bottom:15px;">⚙️ Invoice Settings</h3>
         <label>Logo da Empresa (Upload)</label>
         <input type="file" id="logoUpload" accept="image/*" style="margin-bottom:15px; font-size:0.85rem;">
         <label>Seu Endereço (FROM)</label><textarea id="uAddr" rows="2"></textarea>
@@ -149,7 +162,6 @@
     let lang = 'pt';
     let base64Logo = localStorage.getItem('isq_logo_compressed') || "";
 
-    // Listener para o Upload e Compressão Leve da Imagem
     document.getElementById('logoUpload').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
@@ -158,9 +170,8 @@
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    canvas.width = 150; // Comprime para tamanho leve padrão
+                    canvas.width = 150;
                     canvas.height = 150;
-                    const ctx = canvas.getContext('20d');
                     canvas.getContext('2d').drawImage(img, 0, 0, 150, 150);
                     base64Logo = canvas.toDataURL('image/png');
                     localStorage.setItem('isq_logo_compressed', base64Logo);
@@ -259,7 +270,6 @@
         const total = (m(document.getElementById('t2').value) - m(document.getElementById('t1').value)) - (m(document.getElementById('l2').value) - m(document.getElementById('l1').value));
         if(isNaN(total) || total <= 0) return alert("Erro nos horários!");
         
-        // Norma das 8h diárias
         let overtimeDoDia = Math.max(0, total - 480);
         
         let obj = { id: Date.now(), d, m: total, ot: overtimeDoDia, g: (total/60)*r };
@@ -298,7 +308,6 @@
         doc.setFillColor(30, 41, 59); doc.rect(105, 0, 105, 60, 'F');
         doc.setFillColor(255, 255, 255); doc.rect(0, 0, 105, 60, 'F');
         
-        // Logo Redimensionado de Forma Suave (Tamanho 30x30 real)
         if(base64Logo) { try { doc.addImage(base64Logo, 'PNG', 15, 12, 30, 30, undefined, 'FAST'); } catch(e) {} }
         else { doc.setTextColor(30); doc.setFontSize(22); doc.text(c || "COMPANY", 15, 25); }
 
@@ -327,6 +336,7 @@
         document.getElementById('bName').value = localStorage.getItem('b_name') || '';
         document.getElementById('bAcc').value = localStorage.getItem('b_acc') || '';
         document.getElementById('bPaypal').value = localStorage.getItem('b_paypal') || '';
+        document.getElementById('uLogo').value = localStorage.getItem('u_logo') || '';
         document.getElementById('iNext').value = invNum;
         
         const ins = document.querySelectorAll('.nav-f');
