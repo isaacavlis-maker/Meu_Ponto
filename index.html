@@ -2,113 +2,19 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Global Timesheet Pro</title>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#0f172a">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Isaque</title>
     <style>
-        :root { --accent: #4f46e5; --overtime: #f59e0b; --bg: #0f172a; --surface: #ffffff; --text-dark: #1e293b; --text-sub: #64748b; --success: #10b981; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, system-ui, sans-serif; }
-        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; color: white; transition: 0.5s; }
-        body { background: #f1f5f9; color: var(--text-dark); display: none; padding: 15px; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #1e293b; padding: 20px; border-radius: 18px; color: white; }
-        .card { background: white; border-radius: 18px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); margin-bottom: 15px; border: 1px solid #e2e8f0; }
-        .btn-start { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer; }
-        .tabs { display: flex; gap: 5px; background: #e2e8f0; padding: 4px; border-radius: 12px; margin-bottom: 15px; }
-        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 9px; cursor: pointer; font-weight: 700; color: var(--text-sub); background: transparent; }
-        .tab-btn.active { background: white; color: var(--accent); }
-        .panel { display: none; } .panel.active { display: block; }
-        table { width: 100%; border-collapse: collapse; }
-        td, th { padding: 10px; border-bottom: 1px solid #f1f5f9; text-align: left; font-size: 0.8rem; }
-        footer { text-align: center; margin-top: 25px; font-size: 0.7rem; color: var(--text-sub); }
+        body { background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: sans-serif; }
+        .card { background: #1e293b; padding: 30px; border-radius: 20px; text-align: center; border: 2px solid #4f46e5; }
+        button { background: #4f46e5; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; }
     </style>
 </head>
 <body>
-<div id="splash-screen">
-    <div style="background: rgba(255,255,255,0.05); padding: 30px; border-radius: 25px; text-align: center; width: 85%; max-width: 380px; border: 1px solid rgba(255,255,255,0.1);">
-        <h2 style="margin-bottom: 10px;">Timesheet Pro</h2>
-        <select id="lang-selector" style="width: 100%; padding: 12px; border-radius: 12px; margin: 20px 0;">
-            <option value="pt">Português</option>
-            <option value="en" selected>English</option>
-            <option value="es">Español</option>
-        </select>
-        <button class="btn-start" onclick="initApp()">START / INICIAR</button>
-    </div>
-</div>
-<div class="container" id="main-app">
-    <header>
-        <div><h1 style="font-size: 1.1rem;">Time Tracker</h1><span style="font-size: 0.6rem; opacity: 0.7;">Isaque Edition</span></div>
-        <div id="relogio" style="font-size: 1rem; font-weight: 900;">00:00</div>
-    </header>
     <div class="card">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div style="grid-column: span 2;"><label style="font-size:0.6rem; font-weight:800; color:var(--text-sub);">NAME</label><input type="text" id="userName" style="width:100%; padding:10px; border-radius:10px; border:1px solid #e2e8f0;"></div>
-            <div><label style="font-size:0.6rem; font-weight:800; color:var(--text-sub);">COMPANY</label><input type="text" id="userCompany" style="width:100%; padding:10px; border-radius:10px; border:1px solid #e2e8f0;"></div>
-            <div><label style="font-size:0.6rem; font-weight:800; color:var(--text-sub);">RATE ($)</label><input type="number" id="valorHora" style="width:100%; padding:10px; border-radius:10px; border:1px solid #e2e8f0;"></div>
-        </div>
+        <h1>⏱️ Sistema Isaque</h1>
+        <p>Se você está vendo esta tela, o link FUNCIONOU!</p>
+        <button onclick="alert('Sistema OK!')">TESTAR BOTÃO</button>
     </div>
-    <nav class="tabs">
-        <button id="tabL" class="tab-btn active" onclick="switchTab('lancar')">ENTRY</button>
-        <button id="tabR" class="tab-btn" onclick="switchTab('resumo')">REPORTS</button>
-    </nav>
-    <div id="panel-lancar" class="panel active">
-        <div class="card">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div style="grid-column: span 2;"><input type="date" id="dt" style="width:100%; padding:10px; border-radius:10px; border:1px solid #e2e8f0;"></div>
-                <div><label style="font-size:0.6rem;">IN</label><input type="time" id="chegada" style="width:100%; padding:10px; border-radius:10px; border:1px solid #e2e8f0;"></div>
-                <div><label style="font-size:0.6rem;">OUT</label><input type="time" id="saida" style="width:100%; padding:10px; border-radius:10px; border:1px solid #e2e8f0;"></div>
-                <div><label style="font-size:0.6rem;">LUNCH IN</label><input type="time" id="alEnt" style="width:100%; padding:10px; border-radius:10px; border:1px solid #e2e8f0;"></div>
-                <div><label style="font-size:0.6rem;">LUNCH OUT</label><input type="time" id="alSai" style="width:100%; padding:10px; border-radius:10px; border:1px solid #e2e8f0;"></div>
-            </div>
-            <button class="btn-start" style="margin-top:15px;" onclick="adicionarRegistro()">SAVE</button>
-        </div>
-        <div class="card"><table style="width:100%;"><thead><tr><th>Date</th><th>Total</th><th>Pay</th><th></th></tr></thead><tbody id="tbodyMain"></tbody></table></div>
-    </div>
-    <div id="panel-resumo" class="panel">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div class="card" style="border-left: 4px solid var(--accent);"><div>TOTAL MONTH</div><div id="kMes" style="font-size:1.5rem; font-weight:900;">00:00</div></div>
-            <div class="card" style="border-left: 4px solid var(--overtime);"><div>OVERTIME</div><div id="kOT" style="font-size:1.5rem; font-weight:900;">00:00</div></div>
-        </div>
-        <button class="btn-start" style="background:#10b981; margin-top:10px;" onclick="exportarExcel()">EXCEL</button>
-    </div>
-    <footer><p style="font-weight: 900; color: var(--text-dark);">MADE BY ISAQUE</p></footer>
-</div>
-<script>
-    let registros = JSON.parse(localStorage.getItem('pontoV8')) || [];
-    function initApp() { document.getElementById('splash-screen').style.opacity = '0'; setTimeout(() => { document.getElementById('splash-screen').style.display = 'none'; document.body.style.display = 'block'; }, 500); }
-    function switchTab(t) { document.querySelectorAll('.panel, .tab-btn').forEach(el => el.classList.remove('active')); document.getElementById('panel-'+t).classList.add('active'); document.getElementById(t === 'lancar' ? 'tabL' : 'tabR').classList.add('active'); if(t==='resumo') renderResumo(); }
-    function tToM(t) { if(!t) return 0; const [h, m] = t.split(':').map(Number); return h * 60 + m; }
-    function mToH(m) { return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`; }
-    function adicionarRegistro() {
-        const d = document.getElementById('dt').value;
-        const vh = parseFloat(document.getElementById('valorHora').value) || 0;
-        const totalM = (tToM(document.getElementById('saida').value) - tToM(document.getElementById('chegada').value)) - (tToM(document.getElementById('alSai').value) - tToM(document.getElementById('alEnt').value));
-        if(totalM < 0) return alert("Error!");
-        const obj = { id: Date.now(), data: d, totalM, otM: Math.max(0, totalM-480), ganho: (totalM/60)*vh };
-        registros = registros.filter(r => r.data !== d); registros.push(obj);
-        localStorage.setItem('pontoV8', JSON.stringify(registros)); renderTabela(); alert("Done!");
-    }
-    function renderTabela() {
-        const body = document.getElementById('tbodyMain'); body.innerHTML = '';
-        registros.sort((a,b) => b.data.localeCompare(a.data)).forEach(r => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${r.data}</td><td>${mToH(r.totalM)}</td><td>$${r.ganho.toFixed(2)}</td><td><button onclick="remover(${r.id})">❌</button></td>`;
-            body.appendChild(tr);
-        });
-    }
-    function renderResumo() {
-        const rMes = registros;
-        document.getElementById('kMes').innerText = mToH(rMes.reduce((a,b) => a+b.totalM, 0));
-        document.getElementById('kOT').innerText = mToH(rMes.reduce((a,b) => a+b.otM, 0));
-    }
-    function remover(id) { registros = registros.filter(r => r.id !== id); localStorage.setItem('pontoV8', JSON.stringify(registros)); renderTabela(); }
-    function exportarExcel() { const ws = XLSX.utils.json_to_sheet(registros); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Data"); XLSX.writeFile(wb, "Ponto.xlsx"); }
-    window.onload = () => { renderTabela(); setInterval(() => { document.getElementById('relogio').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }, 1000); };
-</script>
 </body>
 </html>
