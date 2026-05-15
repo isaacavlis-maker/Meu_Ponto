@@ -1,0 +1,323 @@
+import google.ds_python_interpreter
+
+code = """
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Global Timesheet Pro</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f172a">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        :root {
+            --accent: #4f46e5;
+            --overtime: #f59e0b;
+            --bg: #0f172a;
+            --surface: #ffffff;
+            --text-dark: #1e293b;
+            --text-sub: #64748b;
+            --success: #10b981;
+            --safe-area-top: env(safe-area-inset-top);
+        }
+
+        * { 
+            margin: 0; padding: 0; box-sizing: border-box; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Ajuste para Celular - Previne zoom indesejado */
+        input { font-size: 16px !important; }
+
+        /* TELA DE ABERTURA (SPLASH SCREEN) */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; color: white;
+        }
+        .splash-card {
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px);
+            padding: 30px; border-radius: 25px; border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center; width: 85%; max-width: 380px;
+        }
+        .lang-select {
+            width: 100%; padding: 12px; border-radius: 12px; border: none;
+            background: white; color: var(--text-dark); font-weight: bold; margin: 20px 0;
+        }
+
+        /* APP PRINCIPAL */
+        body { background: #f1f5f9; color: var(--text-dark); display: none; padding: 15px; padding-top: calc(15px + var(--safe-area-top)); }
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 20px; background: #1e293b;
+            padding: 20px; border-radius: 18px; color: white;
+        }
+
+        .card { background: white; border-radius: 18px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); margin-bottom: 15px; border: 1px solid #e2e8f0; }
+        .card-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 12px; color: var(--text-sub); }
+
+        /* Grid Responsivo para Mobile */
+        .grid-config { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .full-col { grid-column: span 2; }
+
+        .input-group { display: flex; flex-direction: column; gap: 4px; }
+        label { font-size: 0.6rem; font-weight: 800; color: var(--text-sub); text-transform: uppercase; }
+        input { padding: 10px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; }
+
+        .tabs { display: flex; gap: 5px; background: #e2e8f0; padding: 4px; border-radius: 12px; margin-bottom: 15px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 9px; cursor: pointer; font-weight: 700; color: var(--text-sub); background: transparent; font-size: 0.8rem; }
+        .tab-btn.active { background: white; color: var(--accent); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .kpi-box { background: white; padding: 15px; border-radius: 15px; border-left: 4px solid var(--accent); }
+        .kpi-val { font-size: 1.4rem; font-weight: 900; }
+
+        /* Tabela Mobile Friendly */
+        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th { text-align: left; padding: 10px; color: var(--text-sub); font-size: 0.6rem; text-transform: uppercase; }
+        td { padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; }
+
+        .btn-start { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer; }
+        
+        footer { text-align: center; margin-top: 25px; padding: 15px; font-size: 0.7rem; color: var(--text-sub); }
+        .isaque-sig { font-weight: 900; color: var(--text-dark); margin-top: 5px; }
+
+        /* Estilo para o botão de Instalação */
+        #install-button {
+            display: none; background: var(--success); color: white;
+            padding: 8px 15px; border-radius: 20px; font-size: 0.7rem;
+            font-weight: bold; border: none; margin-bottom: 10px; width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div id="splash-screen">
+    <div class="splash-card">
+        <h2 style="margin-bottom: 10px;">Timesheet Pro</h2>
+        <select id="lang-selector" class="lang-select">
+            <option value="pt">Português</option>
+            <option value="en" selected>English</option>
+            <option value="es">Español</option>
+        </select>
+        <button class="btn-start" onclick="initApp()">START / INICIAR</button>
+    </div>
+</div>
+
+<div class="container" id="main-app">
+    <button id="install-button">📲 INSTALL APP / INSTALAR</button>
+    
+    <header>
+        <div>
+            <h1 style="font-size: 1.1rem;" id="h-title">Time Tracker</h1>
+            <span id="h-sub" style="font-size: 0.6rem; opacity: 0.7;">Isaque Edition</span>
+        </div>
+        <div style="text-align: right;">
+            <div id="relogio" style="font-size: 1rem; font-weight: 900;">00:00</div>
+        </div>
+    </header>
+
+    <div class="card">
+        <span class="card-title" id="t-settings">Settings</span>
+        <div class="grid-config">
+            <div class="input-group full-col"><label id="l-name">Name</label><input type="text" id="userName" class="nav-in"></div>
+            <div class="input-group"><label id="l-company">Company</label><input type="text" id="userCompany" class="nav-in"></div>
+            <div class="input-group"><label id="l-rate">Rate (US$)</label><input type="number" id="valorHora" class="nav-in"></div>
+        </div>
+    </div>
+
+    <nav class="tabs">
+        <button id="tabL" class="tab-btn active" onclick="switchTab('lancar')">ENTRY</button>
+        <button id="tabR" class="tab-btn" onclick="switchTab('resumo')">REPORTS</button>
+    </nav>
+
+    <div id="panel-lancar" class="panel active">
+        <div class="card">
+            <div class="grid-form">
+                <div class="input-group full-col"><label id="l-date">Date</label><input type="date" id="dt" class="nav-in"></div>
+                <div class="input-group"><label id="l-in">In</label><input type="time" id="chegada" class="nav-in"></div>
+                <div class="input-group"><label id="l-out">Out</label><input type="time" id="saida" class="nav-in"></div>
+                <div class="input-group"><label id="l-l1">Lunch In</label><input type="time" id="alEnt" class="nav-in"></div>
+                <div class="input-group"><label id="l-l2">Lunch Out</label><input type="time" id="alSai" class="nav-in"></div>
+            </div>
+            <button class="btn-start" style="margin-top:15px;" id="btn-save" onclick="adicionarRegistro()">SAVE ENTRY</button>
+        </div>
+
+        <div class="card table-wrap">
+            <table id="main-table">
+                <thead>
+                    <tr>
+                        <th id="th-date">Date</th>
+                        <th id="th-total">Total</th>
+                        <th id="th-pay">Pay</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyMain"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="panel-resumo" class="panel">
+        <div class="kpi-grid">
+            <div class="kpi-box">
+                <div class="kpi-label" id="k-total">Month Total</div>
+                <div class="kpi-val" id="kMes">00:00</div>
+                <div id="mMes" style="color:var(--success); font-weight:bold; font-size: 0.8rem;">$ 0.00</div>
+            </div>
+            <div class="kpi-box" style="border-left-color: var(--overtime);">
+                <div class="kpi-label" id="k-ot">Overtime</div>
+                <div class="kpi-val" id="kOT" style="color:var(--overtime)">00:00</div>
+            </div>
+        </div>
+        <div class="btn-row" style="display:flex; gap:10px; margin-top:15px;">
+            <button class="btn-start" style="background:#10b981" onclick="exportarExcel()">EXCEL</button>
+            <button class="btn-start" style="background:#ef4444" onclick="exportarPDF()">PDF</button>
+        </div>
+    </div>
+
+    <footer>
+        <p class="isaque-sig">MADE BY ISAQUE / FEITO POR ISAQUE</p>
+    </footer>
+</div>
+
+<script>
+    let registros = JSON.parse(localStorage.getItem('pontoIsaqueV7')) || [];
+    let currentLang = 'en';
+
+    // Traduções
+    const translations = {
+        pt: { h_title: "Controle", h_sub: "Edição Isaque", t_settings: "Perfil", l_name: "Nome", l_company: "Empresa", l_rate: "Valor Hora", l_date: "Data", l_in: "Entrada", l_out: "Saída", l_l1: "Almoço", l_l2: "Volta", btn_save: "SALVAR", tabL: "REGISTRO", tabR: "RESUMO", th_date: "Data", th_total: "Horas", th_pay: "Ganho", k_total: "Total Mês", k_ot: "Extra" },
+        en: { h_title: "Time Tracker", h_sub: "Isaque Edition", t_settings: "Settings", l_name: "Name", l_company: "Company", l_rate: "Hourly Rate", l_date: "Date", l_in: "Clock In", l_out: "Clock Out", l_l1: "Lunch Start", l_l2: "Lunch End", btn_save: "SAVE ENTRY", tabL: "ENTRY", tabR: "REPORTS", th_date: "Date", th_total: "Total", th_pay: "Pay", k_total: "Month Total", k_ot: "Overtime" },
+        es: { h_title: "Control", h_sub: "Edición Isaque", t_settings: "Perfil", l_name: "Nombre", l_company: "Empresa", l_rate: "Precio Hora", l_date: "Fecha", l_in: "Entrada", l_out: "Salida", l_l1: "Almuerzo", l_l2: "Regreso", btn_save: "GUARDAR", tabL: "REGISTRO", tabR: "REPORTES", th_date: "Fecha", th_total: "Horas", th_pay: "Pago", k_total: "Total Mes", k_ot: "Extra" }
+    };
+
+    function initApp() {
+        currentLang = document.getElementById('lang-selector').value;
+        document.getElementById('splash-screen').style.display = 'none';
+        document.body.style.display = 'block';
+        applyTranslations();
+    }
+
+    function applyTranslations() {
+        const t = translations[currentLang];
+        Object.keys(t).forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = t[id]; });
+        renderTabela();
+    }
+
+    // Gerenciamento da Instalação (PWA)
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('install-button').style.display = 'block';
+    });
+
+    document.getElementById('install-button').addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') document.getElementById('install-button').style.display = 'none';
+            deferredPrompt = null;
+        }
+    });
+
+    // Lógica de Dados (Simificada para performance)
+    window.onload = () => {
+        const hoje = new Date().toISOString().split('T')[0];
+        document.getElementById('dt').value = hoje;
+        document.getElementById('userName').value = localStorage.getItem('isq7_nome') || '';
+        document.getElementById('userCompany').value = localStorage.getItem('isq7_empresa') || '';
+        document.getElementById('valorHora').value = localStorage.getItem('isq7_valor') || '';
+        atualizarRelogio();
+        setInterval(atualizarRelogio, 1000);
+        configNav();
+    };
+
+    function atualizarRelogio() { document.getElementById('relogio').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); }
+    
+    function tToM(t) { if(!t) return 0; const [h, m] = t.split(':').map(Number); return h * 60 + m; }
+    function mToH(m) { return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`; }
+
+    function adicionarRegistro() {
+        const d = document.getElementById('dt').value;
+        const vh = parseFloat(document.getElementById('valorHora').value) || 0;
+        const totalM = (tToM(document.getElementById('saida').value) - tToM(document.getElementById('chegada').value)) - (tToM(document.getElementById('alSai').value) - tToM(document.getElementById('alEnt').value));
+        if(totalM < 0) return alert("Error!");
+        const obj = { id: Date.now(), data: d, totalM, otM: Math.max(0, totalM-480), ganho: (totalM/60)*vh };
+        registros = registros.filter(r => r.data !== d);
+        registros.push(obj);
+        localStorage.setItem('pontoIsaqueV7', JSON.stringify(registros));
+        localStorage.setItem('isq7_nome', document.getElementById('userName').value);
+        localStorage.setItem('isq7_empresa', document.getElementById('userCompany').value);
+        localStorage.setItem('isq7_valor', vh);
+        renderTabela();
+        alert("Done!");
+    }
+
+    function renderTabela() {
+        const body = document.getElementById('tbodyMain');
+        body.innerHTML = '';
+        [...registros].sort((a,b) => b.data.localeCompare(a.data)).forEach(r => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${r.data.split('-').slice(1).reverse().join('/')}</td><td><b>${mToH(r.totalM)}</b></td><td>$${r.ganho.toFixed(2)}</td><td><button onclick="remover(${r.id})">❌</button></td>`;
+            body.appendChild(tr);
+        });
+    }
+
+    function renderResumo() {
+        const mes = new Date().toISOString().substring(0, 7);
+        const rMes = registros.filter(r => r.data.startsWith(mes));
+        document.getElementById('kMes').innerText = mToH(rMes.reduce((a,b) => a+b.totalM, 0));
+        document.getElementById('kOT').innerText = mToH(rMes.reduce((a,b) => a+b.otM, 0));
+        document.getElementById('mMes').innerText = "$" + rMes.reduce((a,b) => a+b.ganho, 0).toFixed(2);
+    }
+
+    function switchTab(t) {
+        document.querySelectorAll('.panel, .tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(`panel-${t}`).classList.add('active');
+        document.getElementById(t === 'lancar' ? 'tabL' : 'tabR').classList.add('active');
+        if(t === 'resumo') renderResumo();
+    }
+
+    function remover(id) { registros = registros.filter(r => r.id !== id); localStorage.setItem('pontoIsaqueV7', JSON.stringify(registros)); renderTabela(); }
+    
+    function configNav() {
+        document.querySelectorAll('.nav-in').forEach((input, i, list) => {
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); if (i < list.length - 1) list[i + 1].focus(); else adicionarRegistro(); } });
+        });
+    }
+
+    function exportarExcel() {
+        const ws = XLSX.utils.json_to_sheet(registros.map(r => ({ Date: r.data, Total: mToH(r.totalM), OT: mToH(r.otM), Pay: r.ganho.toFixed(2) })));
+        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Sheet1"); XLSX.writeFile(wb, "Timesheet.xlsx");
+    }
+
+    function exportarPDF() {
+        const doc = new jspdf.jsPDF(); doc.text("Timesheet - Isaque", 10, 10);
+        doc.autoTable({ head: [['Date', 'Total', 'Earnings']], body: registros.map(r => [r.data, mToH(r.totalM), r.ganho.toFixed(2)]) });
+        doc.save("Report.pdf");
+    }
+</script>
+</body>
+</html>
+"""
+
+with open("Global_Timesheet_PWA.html", "w", encoding="utf-8") as f:
+    f.write(code)
