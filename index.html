@@ -3,291 +3,341 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Timesheet Pro Isaque V21</title>
+    <title>Timesheet Pro Isaque - Platinum V22</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        :root { --p: #1e293b; --accent: #4f46e5; --ot: #f59e0b; --bg: #f1f5f9; --text: #1e293b; --success: #10b981; }
-        * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, sans-serif; }
-        body { background: var(--bg); color: var(--text); padding-bottom: 50px; }
-        #splash { position:fixed; top:0; left:0; width:100%; height:100%; background: #1e293b; display:flex; align-items:center; justify-content:center; z-index:9999; color:white; flex-direction:column; }
-        .splash-card { background: rgba(255,255,255,0.05); padding: 30px; border-radius: 25px; text-align: center; width: 85%; border: 1px solid rgba(255,255,255,0.1); }
-        header { background:#1e293b; color:white; padding:20px; border-radius:0 0 20px 20px; display:flex; justify-content:space-between; align-items: center; }
-        .card { background:white; border-radius:20px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,0.05); margin-bottom:15px; }
-        .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+        :root { 
+            --p: #6366f1; 
+            --ot: #fbbf24; 
+            --bg: #0f172a; 
+            --card: #1e293b;
+            --text: #f8fafc;
+            --accent: #818cf8;
+        }
+        
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            padding-bottom: 50px; 
+            background-image: radial-gradient(circle at top right, #1e1b4b, transparent), radial-gradient(circle at bottom left, #1e1b4b, transparent);
+            min-height: 100vh;
+        }
+
+        #splash { 
+            position:fixed; top:0; left:0; width:100%; height:100%; 
+            background: var(--bg); 
+            display:flex; align-items:center; justify-content:center; 
+            z-index:9999; flex-direction:column; 
+        }
+        .c-splash { 
+            background: rgba(255,255,255,0.03); 
+            backdrop-filter: blur(15px); 
+            padding:40px; border-radius:30px; 
+            text-align:center; width:85%; max-width:400px; 
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+
+        header { 
+            padding:30px 20px; text-align: center;
+        }
+        header h1 { font-size: 1.5rem; letter-spacing: 2px; color: var(--accent); text-shadow: 0 0 10px rgba(129, 140, 248, 0.5); }
+        
+        .card { 
+            background: var(--card); 
+            border-radius:24px; padding:24px; 
+            margin: 0 15px 20px 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+        }
+
+        .grid { display:grid; grid-template-columns: 1fr 1fr; gap:15px; }
         .full { grid-column: span 2; }
-        label { font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; display: block; }
-        input, select, textarea { width:100%; padding:12px; border:2px solid #e2e8f0; border-radius:12px; font-size:1rem; outline: none; }
-        .tabs { display:flex; gap:8px; background:#e2e8f0; padding:5px; border-radius:15px; margin-bottom:20px; }
-        .t-btn { flex:1; padding:12px; border:none; border-radius:10px; background:transparent; font-weight:bold; color: #64748b; }
-        .t-btn.active { background:white; color:var(--accent); }
-        .panel { display:none; } .panel.active { display:block; }
-        button.btn-main { background:var(--accent); color:white; border:none; padding:15px; border-radius:12px; width:100%; font-weight:bold; cursor:pointer; }
-        #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; padding:20px; overflow-y:auto; }
-        .modal-content { background:white; border-radius:25px; padding:25px; max-width:500px; margin:auto; }
+
+        label { font-size: 0.7rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; display: block; letter-spacing: 1px; }
+        
+        input, select, textarea { 
+            width:100%; padding:14px; 
+            border:1px solid rgba(255,255,255,0.1); 
+            border-radius:14px; 
+            background: rgba(15, 23, 42, 0.6); 
+            color: white; font-size:1rem; outline: none; transition: 0.3s;
+        }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.2); }
+
+        /* Estilo Botões 3D Futuristas */
+        .btn-3d {
+            background: linear-gradient(180deg, var(--accent) 0%, var(--p) 100%);
+            color: white; border: none; padding: 16px; border-radius: 16px;
+            font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 6px 0 #3730a3, 0 12px 20px rgba(0,0,0,0.4);
+            transition: all 0.1s active;
+            width: 100%;
+        }
+        .btn-3d:active {
+            box-shadow: 0 2px 0 #3730a3, 0 4px 10px rgba(0,0,0,0.4);
+            transform: translateY(4px);
+        }
+
+        .tabs { display:flex; gap:10px; padding:0 15px; margin-bottom:20px; }
+        .t-btn { 
+            flex:1; padding:14px; border:none; border-radius:15px; 
+            background: rgba(255,255,255,0.05); color: #94a3b8; 
+            font-weight:700; cursor:pointer; transition: 0.3s;
+        }
+        .t-btn.active { background: var(--card); color: var(--accent); border: 1px solid rgba(129, 140, 248, 0.3); }
+
+        .kpi-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 15px; margin-bottom: 20px; }
+        .kpi-card { 
+            background: var(--card); padding: 20px; border-radius: 24px; 
+            text-align: center; border-bottom: 4px solid var(--p);
+        }
+        .kpi-val { font-size: 1.5rem; font-weight: 800; margin-top: 5px; color: var(--accent); }
+
         table { width:100%; border-collapse:collapse; }
-        td { padding:10px; border-bottom: 1px solid #f1f5f9; font-size:0.85rem; }
-        .powered-footer { text-align:center; font-size:9px; color:#94a3b8; margin-top:20px; font-weight:bold; text-transform:uppercase; letter-spacing:1px; }
+        td { padding:15px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size:0.9rem; }
+
+        #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; padding:20px; }
+        .m-content { background: var(--card); border-radius:30px; padding:30px; max-width:500px; margin:auto; border: 1px solid rgba(255,255,255,0.1); }
+        
+        .powered { text-align: center; font-size: 10px; color: #64748b; margin-top: 30px; font-weight: 900; letter-spacing: 2px; }
     </style>
 </head>
 <body>
 
 <div id="splash">
-    <div class="splash-card">
-        <h2 style="margin-bottom:10px;">TIMESHEET PRO</h2>
-        <select id="langSet" style="margin-bottom:20px; color: black;">
-            <option value="en">English (US)</option>
-            <option value="pt" selected>Português (BR)</option>
-            <option value="es">Español (ES)</option>
+    <div class="c-splash">
+        <h1 style="color:var(--accent); margin-bottom:10px;">PLATINUM V22</h1>
+        <p style="font-size:0.8rem; margin-bottom:30px; opacity:0.6;">SISTEMA INTELIGENTE DE INVOICE</p>
+        <select id="langSet" style="margin-bottom:20px;">
+            <option value="pt">PORTUGUÊS (BR)</option>
+            <option value="en">ENGLISH (US)</option>
+            <option value="es">ESPAÑOL (ES)</option>
         </select>
-        <button class="btn-main" onclick="iniciarApp()">ENTRAR / START</button>
-        <div class="powered-footer" style="color:white; opacity:0.5;">Developed & Powered By : Isaqueavlis</div>
+        <button class="btn-3d" onclick="iniciar()">ACESSAR SISTEMA</button>
+        <div class="powered">ISAQUEAVLIS TECH</div>
     </div>
 </div>
 
-<div id="app-content" style="display:none; padding:15px;">
+<div id="app" style="display:none;">
     <header>
-        <div><b id="txt-title">Time Tracker</b><br><small>Platinum V21</small></div>
-        <button onclick="toggleModal(true)" style="background:none; border:none; color:white; font-size:20px;">⚙️</button>
+        <h1 id="txt-title">TIME TRACKER</h1>
+        <div style="display:flex; justify-content: center; gap: 10px; margin-top: 10px;">
+             <button onclick="toggleModal(true)" style="background:none; border: 1px solid #475569; color: #94a3b8; padding: 5px 15px; border-radius: 20px; font-size: 12px;">CONFIGURAÇÕES ⚙️</button>
+             <button onclick="clearAll()" style="background:none; border: 1px solid #ef4444; color: #ef4444; padding: 5px 15px; border-radius: 20px; font-size: 12px;">LIMPAR TUDO 🗑️</button>
+        </div>
     </header>
 
-    <div class="card">
-        <div class="grid">
-            <div class="full"><label id="txt-name-label">Seu Nome</label><input type="text" id="uN" class="nav-f"></div>
-            <div><label id="txt-comp-label">Empresa</label><input type="text" id="uC" class="nav-f"></div>
-            <div><label id="txt-rate-label">Valor Hora ($)</label><input type="number" id="uR" class="nav-f"></div>
-        </div>
+    <div class="tabs">
+        <button id="b-l" class="t-btn active" onclick="nav('lancar')">REGISTRO</button>
+        <button id="b-r" class="t-btn" onclick="nav('resumo')">RELATÓRIO</button>
     </div>
 
-    <nav class="tabs">
-        <button id="b1" class="t-btn active" onclick="show('lancar')">LANÇAR</button>
-        <button id="b2" class="t-btn" onclick="show('resumo')">RELATÓRIO</button>
-    </nav>
-
-    <div id="p-lancar" class="panel active">
+    <div id="p-lancar" class="section">
         <div class="card">
             <div class="grid">
-                <div class="full"><label>Data</label><input type="date" id="data" class="nav-f"></div>
-                <div><label>Entrada</label><input type="time" id="t1" class="nav-f"></div>
-                <div><label>Almoço IN</label><input type="time" id="l1" class="nav-f"></div>
-                <div><label>Almoço OUT</label><input type="time" id="l2" class="nav-f"></div>
-                <div><label>Saída</label><input type="time" id="t2" class="nav-f"></div>
+                <div class="full"><label>DATA DO TRABALHO</label><input type="date" id="data"></div>
+                <div><label>ENTRADA</label><input type="time" id="t1"></div>
+                <div><label>SAÍDA</label><input type="time" id="t2"></div>
+                <div><label>ALMOÇO IN</label><input type="time" id="l1"></div>
+                <div><label>ALMOÇO OUT</label><input type="time" id="l2"></div>
             </div>
-            <button class="btn-main" style="margin-top:20px;" onclick="salvarPonto()" id="txt-btn-save">SALVAR DIA</button>
+            <button class="btn-3d" style="margin-top:25px;" onclick="salvar()">SALVAR REGISTRO</button>
         </div>
-        <div class="card" style="overflow-x:auto;">
-            <table><tbody id="listaPonto"></tbody></table>
+
+        <div class="card" style="padding:10px;">
+            <table id="tabela"></table>
         </div>
     </div>
 
-    <div id="p-resumo" class="panel">
-        <div class="card" style="border-left:4px solid var(--accent);">
-            <label id="txt-total-label">Total a Receber</label><h2 id="vPay" style="color:var(--accent); font-size:2rem;">$ 0.00</h2>
-            <p id="vOTInfo" style="font-size:0.8rem; color:var(--ot); font-weight:bold;"></p>
+    <div id="p-resumo" class="section" style="display:none;">
+        <div class="kpi-container">
+            <div class="kpi-card"><label>TOTAL HORAS</label><div id="sum-h" class="kpi-val">0h</div></div>
+            <div class="kpi-card" style="border-bottom-color: var(--ot);"><label>OVERTIME</label><div id="sum-ot" class="kpi-val" style="color:var(--ot)">0h</div></div>
         </div>
-        <div class="grid">
-            <button class="btn-main" style="background:#10b981;" onclick="exportarExcel()">📊 EXCEL</button>
-            <button class="btn-main" style="background:#ef4444;" onclick="exportarPDF()">📄 GERAR INVOICE</button>
+        
+        <div class="card" style="text-align:center; border-bottom: 4px solid #10b981;">
+            <label>VALOR TOTAL A RECEBER</label>
+            <div id="sum-pay" class="kpi-val" style="color:#10b981; font-size: 2.5rem;">$ 0.00</div>
+        </div>
+
+        <div class="card" id="monthly-stats" style="font-size: 0.8rem; line-height: 2;">
+            <!-- Aqui entram os cálculos automáticos -->
+        </div>
+
+        <div class="grid" style="padding: 0 15px;">
+            <button class="btn-3d" style="background: #10b981; box-shadow: 0 6px 0 #065f46;" onclick="exportarExcel()">PLANILHA EXCEL</button>
+            <button class="btn-3d" style="background: #ef4444; box-shadow: 0 6px 0 #991b1b;" onclick="pdf()">GERAR INVOICE PDF</button>
         </div>
     </div>
-    <div class="powered-footer">Developed & Powered By : Isaqueavlis</div>
+
+    <div class="powered">DEVELOPED & POWERED BY ISAQUEAVLIS</div>
 </div>
 
 <div id="modal">
-    <div class="modal-content">
-        <h3 style="margin-bottom:15px;">⚙️ Configurações</h3>
-        <label>Logo (Subir Arquivo)</label><input type="file" id="logoUpload" accept="image/*">
-        <label>Seu Endereço</label><textarea id="uAddr" rows="2"></textarea>
-        <label>Endereço da Empresa</label><textarea id="cAddr" rows="2"></textarea>
-        <div class="grid">
-            <div class="full"><label>Banco</label><input type="text" id="bName"></div>
-            <div><label>Conta</label><input type="text" id="bAcc"></div>
-            <div><label>Zelle/PayPal</label><input type="text" id="bPaypal"></div>
-            <div class="full"><label>Nº Próxima Invoice</label><input type="number" id="iNext"></div>
+    <div class="m-content">
+        <label>SEU NOME</label><input type="text" id="uN" placeholder="Ex: Isaque Silva">
+        <label>SUA EMPRESA</label><input type="text" id="uC">
+        <label>VALOR HORA ($)</label><input type="number" id="uR">
+        <label>LOGO URL (OU BASE64)</label><input type="text" id="uLogo" placeholder="Link da imagem">
+        <div class="grid" style="margin-top:15px;">
+             <button class="btn-3d" onclick="toggleModal(false)">SALVAR</button>
         </div>
-        <button class="btn-main" style="margin-top:20px;" onclick="toggleModal(false)">SALVAR E VOLTAR</button>
     </div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('db_isaque_v21')) || [];
-    let invNum = parseInt(localStorage.getItem('inv_num')) || 1;
-    let base64Logo = localStorage.getItem('isq_logo_b64_v21') || "";
+    let db = JSON.parse(localStorage.getItem('isq_db_v22')) || [];
+    let lang = 'pt';
 
-    const translations = {
-        en: { title: "Time Tracker", name: "Your Name", comp: "Company", rate: "Hourly Rate", save: "SAVE DAY", total: "Total Earnings", launch: "ENTRY", report: "REPORT" },
-        pt: { title: "Controle de Ponto", name: "Seu Nome", comp: "Empresa", rate: "Valor Hora", save: "SALVAR DIA", total: "Total a Receber", launch: "LANÇAR", report: "RELATÓRIO" },
-        es: { title: "Control de Horas", name: "Su Nombre", comp: "Empresa", rate: "Precio Hora", save: "GUARDAR DÍA", total: "Total a Recibir", launch: "REGISTRO", report: "REPORTE" }
+    const t = {
+        pt: { title: "CONTROLE DE PONTO", reg: "REGISTRO", rep: "RELATÓRIO" },
+        en: { title: "TIME TRACKER", reg: "ENTRY", rep: "REPORT" },
+        es: { title: "CONTROL DE HORAS", reg: "REGISTRO", rep: "REPORTE" }
     };
 
-    document.getElementById('logoUpload').addEventListener('change', function(e) {
-        const reader = new FileReader();
-        reader.onload = () => { base64Logo = reader.result; localStorage.setItem('isq_logo_b64_v21', base64Logo); };
-        if(e.target.files[0]) reader.readAsDataURL(e.target.files[0]);
-    });
-
-    function iniciarApp() {
-        const lang = document.getElementById('langSet').value;
-        const t = translations[lang];
-        document.getElementById('txt-title').innerText = t.title;
-        document.getElementById('txt-name-label').innerText = t.name;
-        document.getElementById('txt-comp-label').innerText = t.comp;
-        document.getElementById('txt-rate-label').innerText = t.rate;
-        document.getElementById('txt-btn-save').innerText = t.save;
-        document.getElementById('txt-total-label').innerText = t.total;
-        document.getElementById('b1').innerText = t.launch;
-        document.getElementById('b2').innerText = t.report;
+    function iniciar() {
+        lang = document.getElementById('langSet').value;
+        document.getElementById('txt-title').innerText = t[lang].title;
+        document.getElementById('b-l').innerText = t[lang].reg;
+        document.getElementById('b-r').innerText = t[lang].rep;
+        
         document.getElementById('splash').style.display = 'none';
-        document.getElementById('app-content').style.display = 'block';
-        desenhar();
+        document.getElementById('app').style.display = 'block';
+        
+        // Carregar config
+        document.getElementById('uN').value = localStorage.getItem('uN') || '';
+        document.getElementById('uC').value = localStorage.getItem('uC') || '';
+        document.getElementById('uR').value = localStorage.getItem('uR') || '';
+        document.getElementById('uLogo').value = localStorage.getItem('uLogo') || '';
+        
+        render();
     }
 
     function toggleModal(s) {
-        document.getElementById('modal').style.display = s ? 'block' : 'none';
+        document.getElementById('modal').style.display = s ? 'flex' : 'none';
         if(!s) {
-            localStorage.setItem('u_addr', document.getElementById('uAddr').value);
-            localStorage.setItem('c_addr', document.getElementById('cAddr').value);
-            localStorage.setItem('b_name', document.getElementById('bName').value);
-            localStorage.setItem('b_acc', document.getElementById('bAcc').value);
-            localStorage.setItem('b_paypal', document.getElementById('bPaypal').value);
-            invNum = parseInt(document.getElementById('iNext').value) || 1;
-            localStorage.setItem('inv_num', invNum);
-            saveConfig();
+            localStorage.setItem('uN', document.getElementById('uN').value);
+            localStorage.setItem('uC', document.getElementById('uC').value);
+            localStorage.setItem('uR', document.getElementById('uR').value);
+            localStorage.setItem('uLogo', document.getElementById('uLogo').value);
         }
     }
 
-    function show(p) {
-        document.querySelectorAll('.panel, .t-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById('p-'+p).classList.add('active');
-        document.getElementById(p === 'lancar' ? 'b1' : 'b2').classList.add('active');
-        if(p === 'resumo') {
-            let g = db.reduce((a,b)=> a+b.g, 0);
-            let ot = db.reduce((a,b)=> a+b.ot, 0);
-            document.getElementById('vPay').innerText = "$ " + g.toFixed(2);
-            document.getElementById('vOTInfo').innerText = "Total Overtime: " + Math.floor(ot/60) + "h " + (ot%60) + "m";
-        }
+    function nav(p) {
+        document.getElementById('p-lancar').style.display = p === 'lancar' ? 'block' : 'none';
+        document.getElementById('p-resumo').style.display = p === 'resumo' ? 'block' : 'none';
+        document.getElementById('b-l').className = p === 'lancar' ? 't-btn active' : 't-btn';
+        document.getElementById('b-r').className = p === 'resumo' ? 't-btn active' : 't-btn';
+        if(p === 'resumo') calc();
     }
 
-    const m = (t) => { if(!t) return 0; const [h,min] = t.split(':'); return parseInt(h)*60 + parseInt(min); };
+    const parseM = (time) => { if(!time) return 0; const [h, m] = time.split(':'); return parseInt(h)*60 + parseInt(m); };
+    const formatM = (min) => `${Math.floor(min/60)}h ${min%60}m`;
 
-    function salvarPonto() {
-        const d = document.getElementById('data').value, r = parseFloat(document.getElementById('uR').value) || 0;
-        const total = (m(document.getElementById('t2').value) - m(document.getElementById('t1').value)) - (m(document.getElementById('l2').value) - m(document.getElementById('l1').value));
-        if(isNaN(total) || total <= 0) return alert("Horários inválidos!");
-        let obj = { id: Date.now(), d, m: total, ot: Math.max(0, total-480), g: (total/60)*r };
-        db = db.filter(x => x.d !== d); db.push(obj);
-        localStorage.setItem('db_isaque_v21', JSON.stringify(db));
-        saveConfig();
-        desenhar(); alert("Salvo!");
+    function salvar() {
+        const d = document.getElementById('data').value;
+        const rate = parseFloat(document.getElementById('uR').value) || 0;
+        if(!d) return alert("Selecione a data!");
+
+        let total = parseM(document.getElementById('t2').value) - parseM(document.getElementById('t1').value);
+        let lunch = parseM(document.getElementById('l2').value) - parseM(document.getElementById('l1').value);
+        let real = total - lunch;
+        
+        if(real <= 0) return alert("Horário inválido!");
+
+        // 8h = 480 min
+        let ot = Math.max(0, real - 480);
+        let obj = { d, m: real, ot, g: (real/60) * rate };
+        
+        db = db.filter(x => x.d !== d);
+        db.push(obj);
+        localStorage.setItem('isq_db_v22', JSON.stringify(db));
+        render();
+        alert("Salvo com sucesso!");
     }
 
-    function desenhar() {
+    function render() {
         let h = '';
-        db.sort((a,b)=>b.d.localeCompare(a.d)).forEach(x => {
-            h += `<tr><td>${x.d.split('-').reverse().join('/')}</td><td>${Math.floor(x.m/60)}h ${x.m%60}m</td><td>$${x.g.toFixed(2)}</td><td><button onclick="del(${x.id})" style="border:none;background:none">❌</button></td></tr>`;
+        db.sort((a,b) => b.d.localeCompare(a.d)).forEach(x => {
+            h += `<tr><td>${x.d.split('-').reverse().join('/')}</td><td style="color:var(--accent); font-weight:bold;">${formatM(x.m)}</td><td>$${x.g.toFixed(2)}</td><td onclick="del('${x.d}')">❌</td></tr>`;
         });
-        document.getElementById('listaPonto').innerHTML = h;
+        document.getElementById('tabela').innerHTML = h;
     }
 
-    function del(id) { if(confirm("Apagar?")) { db = db.filter(x=>x.id!==id); localStorage.setItem('db_isaque_v21', JSON.stringify(db)); desenhar(); } }
+    function del(d) { db = db.filter(x => x.d !== d); localStorage.setItem('isq_db_v22', JSON.stringify(db)); render(); }
+    function clearAll() { if(confirm("Apagar TUDO?")) { db = []; localStorage.clear(); location.reload(); } }
 
-    function saveConfig() {
-        localStorage.setItem('u_n', document.getElementById('uN').value);
-        localStorage.setItem('u_c', document.getElementById('uC').value);
-        localStorage.setItem('u_r', document.getElementById('uR').value);
+    function calc() {
+        let th = db.reduce((a,b) => a + b.m, 0);
+        let totOt = db.reduce((a,b) => a + b.ot, 0);
+        let pay = db.reduce((a,b) => a + b.g, 0);
+        
+        document.getElementById('sum-h').innerText = formatM(th);
+        document.getElementById('sum-ot').innerText = formatM(totOt);
+        document.getElementById('sum-pay').innerText = `$ ${pay.toFixed(2)}`;
+        
+        // Stats
+        let days = db.length;
+        document.getElementById('monthly-stats').innerHTML = `
+            <b>RESUMO DETALHADO:</b><br>
+            📅 Dias Trabalhados: ${days}<br>
+            ⏱️ Média Diária: ${days ? formatM(th/days) : 0}<br>
+            💰 Valor p/ Hora: $${document.getElementById('uR').value}<br>
+            🚀 Overtime Total: ${formatM(totOt)}
+        `;
     }
 
     function exportarExcel() {
-        const rows = db.map(x => ({ Data: x.d, Horas: Math.floor(x.m/60)+":"+x.m%60, Overtime: Math.floor(x.ot/60)+":"+x.ot%60, Total: x.g.toFixed(2) }));
-        const ws = XLSX.utils.json_to_sheet(rows);
-        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Ponto");
-        XLSX.writeFile(wb, "Timesheet_Isaque.xlsx");
+        const ws = XLSX.utils.json_to_sheet(db);
+        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Relatorio");
+        XLSX.writeFile(wb, "Timesheet_Isaque_V22.xlsx");
     }
 
-    function exportarPDF() {
-        const { jsPDF } = window.jspdf; const doc = new jsPDF();
-        const n = document.getElementById('uN').value, c = document.getElementById('uC').value;
-        const uA = document.getElementById('uAddr').value, cA = document.getElementById('cAddr').value;
-        const totalG = db.reduce((a,b)=>a+b.g, 0);
+    function pdf() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const n = document.getElementById('uN').value;
+        const c = document.getElementById('uC').value;
+        const total = db.reduce((a,b) => a + b.g, 0);
 
-        // Header Backgrounds - Layout Fiel à sua imagem
-        doc.setFillColor(255, 255, 255); doc.rect(0, 0, 105, 60, 'F');
-        doc.setFillColor(30, 41, 59); doc.rect(105, 0, 105, 60, 'F');
-
-        // Logo (Mantém proporção)
-        if(base64Logo) { try { doc.addImage(base64Logo, 'PNG', 15, 10, 30, 30); } catch(e) {} }
-
-        // Bloco Escuro Direito
-        doc.setTextColor(255, 255, 255); doc.setFontSize(26); doc.setFont(undefined, 'bold');
-        doc.text("INVOICE", 120, 20);
-        doc.setFontSize(9); doc.setFont(undefined, 'normal');
-        doc.text(`Invoice no: ${invNum}`, 120, 30);
-        doc.text(`Invoice Date: ${new Date().toLocaleDateString()}`, 120, 35);
-        doc.setFont(undefined, 'bold'); doc.text("Payment details:", 120, 43);
-        doc.setFont(undefined, 'normal');
-        doc.text(`Bank: ${document.getElementById('bName').value}`, 120, 48);
-        doc.text(`Zelle/PayPal: ${document.getElementById('bPaypal').value}`, 120, 53);
-
-        // Seção TO (Esquerda) e FROM (Direita) - Limpo e sem duplicidade
-        doc.setTextColor(30, 41, 59); doc.setFontSize(10);
-        doc.setFont(undefined, 'bold'); doc.text("INVOICE TO:", 15, 75);
-        doc.setFont(undefined, 'normal'); doc.text(`${c}\n${cA}`, 15, 81);
+        // Design Futurista PDF
+        doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 50, 'F');
+        doc.setTextColor(129, 140, 248); doc.setFontSize(24); doc.text("INVOICE PLATINUM", 15, 25);
+        doc.setFontSize(10); doc.setTextColor(255,255,255); doc.text(`ISAQUE TECH SYSTEM - V22`, 15, 35);
         
-        doc.setFont(undefined, 'bold'); doc.text("FROM:", 120, 75);
-        doc.setFont(undefined, 'normal'); doc.text(`${n}\n${uA}`, 120, 81);
+        // Seção TO/FROM
+        doc.setTextColor(30, 41, 59); doc.setFontSize(12); doc.setFont(undefined, 'bold');
+        doc.text("EMISSOR (FROM):", 15, 65);
+        doc.setFont(undefined, 'normal'); doc.text(n || "Isaque User", 15, 72);
+        
+        doc.setFont(undefined, 'bold'); doc.text("CLIENTE (TO):", 120, 65);
+        doc.setFont(undefined, 'normal'); doc.text(c || "Client Company", 120, 72);
 
-        // Due Total
-        doc.setFillColor(235, 235, 235); doc.rect(15, 100, 75, 12, 'F');
-        doc.setFont(undefined, 'bold'); doc.setFontSize(12); doc.text(`Due Total: $ ${totalG.toFixed(2)}`, 20, 108);
-
-        // Tabela com Overtime
+        // Tabela
         doc.autoTable({
-            head: [['Date', 'Hours', 'Overtime', 'Total']],
-            body: db.sort((a,b)=>a.d.localeCompare(b.d)).map(x=>[x.d.split('-').reverse().join('/'), Math.floor(x.m/60)+"h", Math.floor(x.ot/60)+"h", "$ "+x.g.toFixed(2)]),
-            startY: 120, theme: 'striped', headStyles: {fillColor: [30, 41, 59], halign: 'center'},
-            columnStyles: { 0: {halign: 'left'}, 1: {halign: 'center'}, 2: {halign: 'center'}, 3: {halign: 'right'} }
+            startY: 85,
+            head: [['DATA', 'HORAS REAIS', 'OVERTIME', 'TOTAL ($)']],
+            body: db.sort((a,b)=>a.d.localeCompare(b.d)).map(x => [x.d, formatM(x.m), formatM(x.ot), x.g.toFixed(2)]),
+            theme: 'grid',
+            headStyles: { fillColor: [99, 102, 241] }
         });
 
-        // Sign
-        const finalY = doc.lastAutoTable.finalY + 30;
-        if(finalY > 260) doc.addPage();
-        doc.setDrawColor(200); doc.line(130, finalY, 190, finalY);
-        doc.setFontSize(10); doc.text("Accounting Manager", 135, finalY + 7);
+        const finalY = doc.lastAutoTable.finalY + 15;
+        doc.setFontSize(16); doc.setFont(undefined, 'bold');
+        doc.text(`TOTAL FINAL: $ ${total.toFixed(2)}`, 140, finalY);
         
-        // Footer Brand
         doc.setFontSize(8); doc.setTextColor(150);
-        doc.text("Developed & Powered By : Isaqueavlis", 80, 290);
+        doc.text("Developed & Powered by Isaqueavlis", 75, 285);
 
-        invNum++; localStorage.setItem('inv_num', invNum);
-        document.getElementById('iNext').value = invNum;
-        doc.save(`Invoice_${invNum-1}.pdf`);
+        doc.save("Invoice_Isaque_Platinum.pdf");
     }
-
-    window.onload = () => {
-        document.getElementById('uN').value = localStorage.getItem('u_n') || '';
-        document.getElementById('uC').value = localStorage.getItem('u_c') || '';
-        document.getElementById('uR').value = localStorage.getItem('u_r') || '';
-        document.getElementById('uAddr').value = localStorage.getItem('u_addr') || '';
-        document.getElementById('cAddr').value = localStorage.getItem('c_addr') || '';
-        document.getElementById('bName').value = localStorage.getItem('b_name') || '';
-        document.getElementById('bAcc').value = localStorage.getItem('b_acc') || '';
-        document.getElementById('bPaypal').value = localStorage.getItem('b_paypal') || '';
-        document.getElementById('iNext').value = invNum;
-        
-        const inputs = document.querySelectorAll('.nav-f');
-        inputs.forEach((inp, i) => {
-            inp.addEventListener('keydown', e => {
-                if(e.key === 'Enter') {
-                    e.preventDefault();
-                    if(i < inputs.length - 1) inputs[i+1].focus();
-                    else salvarPonto();
-                }
-            });
-        });
-    };
 </script>
 </body>
 </html>
