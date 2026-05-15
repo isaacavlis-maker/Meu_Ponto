@@ -3,42 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Timesheet Pro Isaque V13</title>
+    <title>Timesheet Pro Isaque V14</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        :root { --p: #1e293b; --accent: #4f46e5; --ot: #f59e0b; --bg: #f1f5f9; --text: #1e293b; --success: #10b981; }
+        :root { --p: #1e293b; --accent: #4f46e5; --bg: #f1f5f9; --text: #1e293b; }
         * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, system-ui, sans-serif; }
-        
         body { background: var(--bg); color: var(--text); padding-bottom: 50px; }
-        
         #splash { position:fixed; top:0; left:0; width:100%; height:100%; background: #1e293b; display:flex; align-items:center; justify-content:center; z-index:9999; color:white; flex-direction:column; }
-        
-        header { background:#1e293b; color:white; padding:20px; border-radius:0 0 20px 20px; margin-bottom:20px; display:flex; justify-content:space-between; align-items: center; }
+        header { background:#1e293b; color:white; padding:20px; border-radius:0 0 20px 20px; display:flex; justify-content:space-between; align-items: center; }
         .card { background:white; border-radius:20px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,0.05); margin-bottom:15px; }
         .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
         .full { grid-column: span 2; }
-
         label { font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; display: block; }
         input, select, textarea { width:100%; padding:12px; border:2px solid #e2e8f0; border-radius:12px; font-size:1rem; outline: none; }
-        input:focus { border-color: var(--accent); }
-
         .tabs { display:flex; gap:8px; background:#e2e8f0; padding:5px; border-radius:15px; margin-bottom:20px; }
         .t-btn { flex:1; padding:12px; border:none; border-radius:10px; background:transparent; font-weight:bold; color: #64748b; }
         .t-btn.active { background:white; color:var(--accent); }
-
         .panel { display:none; } .panel.active { display:block; }
         button.btn-main { background:var(--accent); color:white; border:none; padding:15px; border-radius:12px; width:100%; font-weight:bold; cursor:pointer; }
-        
         #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; padding:20px; overflow-y:auto; }
         .modal-content { background:white; border-radius:25px; padding:25px; max-width:500px; margin:auto; }
-
-        .powered-by { text-align:center; font-size:9px; color:#94a3b8; margin-top:15px; font-weight:bold; text-transform:uppercase; letter-spacing:1px; }
-        .settings-btn { background:rgba(255,255,255,0.1); border:none; color:white; padding:10px; border-radius:12px; }
-        
+        .powered-by { text-align:center; font-size:9px; color:#94a3b8; margin-top:15px; font-weight:bold; text-transform:uppercase; }
         table { width:100%; border-collapse:collapse; }
         th { text-align:left; padding:10px; font-size:0.65rem; color:#94a3b8; border-bottom: 2px solid #f1f5f9; }
         td { padding:10px; border-bottom: 1px solid #f1f5f9; font-size:0.85rem; }
@@ -47,65 +36,55 @@
 <body>
 
 <div id="splash">
-    <img src="icon.png" style="width:80px; border-radius:15px; margin-bottom:20px;" onerror="this.style.display='none'">
-    <select id="langSet" style="width:200px; margin-bottom:15px;">
-        <option value="en">English (US)</option>
-        <option value="pt">Português (BR)</option>
-        <option value="es">Español (ES)</option>
-    </select>
-    <button class="btn-main" style="width:200px" onclick="iniciarApp()">START</button>
+    <h2 style="margin-bottom:20px;">HORAS CONTROLE</h2>
+    <button class="btn-main" style="width:200px" onclick="iniciarApp()">ENTRAR</button>
     <div class="powered-by" style="color:white; opacity:0.5; margin-top:40px;">Developed & Powered By : Isaqueavlis</div>
 </div>
 
 <div id="app-content" style="display:none; padding:15px;">
     <header>
-        <div><b>Time Tracker</b><br><small>Platinum V13</small></div>
-        <button class="settings-btn" onclick="toggleModal(true)">⚙️</button>
+        <div><b>Time Tracker</b><br><small>Platinum V14</small></div>
+        <button onclick="toggleModal(true)" style="background:none; border:none; color:white; font-size:20px;">⚙️</button>
     </header>
 
-    <div class="card">
+    <div class="card" style="margin-top:15px;">
         <div class="grid">
-            <div class="full"><label>Name</label><input type="text" id="uN" class="nav-f"></div>
-            <div><label>Company</label><input type="text" id="uC" class="nav-f"></div>
-            <div><label>Rate ($)</label><input type="number" id="uR" class="nav-f"></div>
+            <div class="full"><label>Seu Nome</label><input type="text" id="uN" class="nav-f"></div>
+            <div><label>Empresa</label><input type="text" id="uC" class="nav-f"></div>
+            <div><label>Valor Hora ($)</label><input type="number" id="uR" class="nav-f"></div>
         </div>
     </div>
 
     <nav class="tabs">
-        <button id="b1" class="t-btn active" onclick="show('lancar')">ENTRY</button>
-        <button id="b2" class="t-btn" onclick="show('resumo')">REPORT</button>
+        <button id="b1" class="t-btn active" onclick="show('lancar')">LANÇAR</button>
+        <button id="b2" class="t-btn" onclick="show('resumo')">RELATÓRIO</button>
     </nav>
 
     <div id="p-lancar" class="panel active">
         <div class="card">
             <div class="grid">
-                <div class="full"><label>Date</label><input type="date" id="data" class="nav-f"></div>
-                <div><label>IN</label><input type="time" id="t1" class="nav-f"></div>
-                <div><label>LUNCH IN</label><input type="time" id="l1" class="nav-f"></div>
-                <div><label>LUNCH OUT</label><input type="time" id="l2" class="nav-f"></div>
-                <div><label>OUT</label><input type="time" id="t2" class="nav-f"></div>
+                <div class="full"><label>Data</label><input type="date" id="data" class="nav-f"></div>
+                <div><label>Entrada</label><input type="time" id="t1" class="nav-f"></div>
+                <div><label>Almoço IN</label><input type="time" id="l1" class="nav-f"></div>
+                <div><label>Almoço OUT</label><input type="time" id="l2" class="nav-f"></div>
+                <div><label>Saída</label><input type="time" id="t2" class="nav-f"></div>
             </div>
-            <button class="btn-main" style="margin-top:20px;" onclick="salvarPonto()">SAVE</button>
+            <button class="btn-main" style="margin-top:20px;" onclick="salvarPonto()">SALVAR DIA</button>
         </div>
         <div class="card" style="overflow-x:auto;">
             <table>
-                <thead><tr><th>Date</th><th>Total</th><th>Pay</th><th></th></tr></thead>
                 <tbody id="listaPonto"></tbody>
             </table>
         </div>
     </div>
 
     <div id="p-resumo" class="panel">
-        <div class="grid">
-            <div class="card" style="margin:0;"><label>TOTAL HRS</label><h2 id="vTotal">00:00</h2></div>
-            <div class="card" style="margin:0; border-left:4px solid var(--ot);"><label>OVERTIME</label><h2 id="vOT" style="color:var(--ot)">00:00</h2></div>
-        </div>
-        <div class="card" style="margin-top:15px; border-left:4px solid var(--success);">
-            <label>TOTAL PAY</label><h2 id="vPay" style="color:var(--success)">$ 0.00</h2>
+        <div class="card" style="border-left:4px solid var(--accent);">
+            <label>Total a Receber</label><h2 id="vPay" style="color:var(--accent); font-size:2rem;">$ 0.00</h2>
         </div>
         <div class="grid">
             <button class="btn-main" style="background:#10b981;" onclick="exportarExcel()">📊 EXCEL</button>
-            <button class="btn-main" style="background:#ef4444;" onclick="exportarPDF()">📄 PDF INVOICE</button>
+            <button class="btn-main" style="background:#ef4444;" onclick="exportarPDF()">📄 GERAR INVOICE</button>
         </div>
     </div>
     
@@ -114,22 +93,24 @@
 
 <div id="modal">
     <div class="modal-content">
-        <h3>⚙️ Settings</h3>
-        <label>Your Address</label><textarea id="uAddr" rows="2"></textarea>
-        <label>Company Address</label><textarea id="cAddr" rows="2"></textarea>
-        <div class="grid" style="margin-top:10px;">
-            <div class="full"><label>Bank Name</label><input type="text" id="bName"></div>
-            <div><label>Account</label><input type="text" id="bAcc"></div>
+        <h3>⚙️ Configurações da Invoice</h3>
+        <label>URL do Logo (Link da imagem)</label><input type="text" id="uLogo" placeholder="http://...">
+        <label>Seu Endereço</label><textarea id="uAddr" rows="2"></textarea>
+        <label>Endereço da Empresa</label><textarea id="cAddr" rows="2"></textarea>
+        <div class="grid">
+            <div class="full"><label>Banco</label><input type="text" id="bName"></div>
+            <div><label>Conta</label><input type="text" id="bAcc"></div>
             <div><label>Swift</label><input type="text" id="bSwift"></div>
             <div class="full"><label>PayPal</label><input type="text" id="bPaypal"></div>
+            <div class="full"><label>Próximo Nº Invoice</label><input type="number" id="iNext"></div>
         </div>
-        <button class="btn-main" style="margin-top:20px;" onclick="toggleModal(false)">SAVE & BACK</button>
-        <div class="powered-by">Developed & Powered By : Isaqueavlis</div>
+        <button class="btn-main" style="margin-top:20px;" onclick="toggleModal(false)">SALVAR E VOLTAR</button>
     </div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('db_isaque_v13')) || [];
+    let db = JSON.parse(localStorage.getItem('db_isaque_v14')) || [];
+    let invNum = parseInt(localStorage.getItem('inv_num')) || 1;
 
     function iniciarApp() {
         document.getElementById('splash').style.display = 'none';
@@ -140,12 +121,15 @@
     function toggleModal(s) {
         document.getElementById('modal').style.display = s ? 'block' : 'none';
         if(!s) {
+            localStorage.setItem('u_logo', document.getElementById('uLogo').value);
             localStorage.setItem('u_addr', document.getElementById('uAddr').value);
             localStorage.setItem('c_addr', document.getElementById('cAddr').value);
             localStorage.setItem('b_name', document.getElementById('bName').value);
             localStorage.setItem('b_acc', document.getElementById('bAcc').value);
             localStorage.setItem('b_swift', document.getElementById('bSwift').value);
             localStorage.setItem('b_paypal', document.getElementById('bPaypal').value);
+            invNum = parseInt(document.getElementById('iNext').value) || 1;
+            localStorage.setItem('inv_num', invNum);
         }
     }
 
@@ -154,9 +138,7 @@
         document.getElementById('p-'+p).classList.add('active');
         document.getElementById(p === 'lancar' ? 'b1' : 'b2').classList.add('active');
         if(p === 'resumo') {
-            let m = db.reduce((a,b)=> a+b.m, 0), ot = db.reduce((a,b)=> a+b.ot, 0), g = db.reduce((a,b)=> a+b.g, 0);
-            document.getElementById('vTotal').innerText = Math.floor(m/60)+"h "+(m%60)+"m";
-            document.getElementById('vOT').innerText = Math.floor(ot/60)+"h "+(ot%60)+"m";
+            let g = db.reduce((a,b)=> a+b.g, 0);
             document.getElementById('vPay').innerText = "$ " + g.toFixed(2);
         }
     }
@@ -166,90 +148,109 @@
     function salvarPonto() {
         const d = document.getElementById('data').value, r = parseFloat(document.getElementById('uR').value) || 0;
         const total = (m(document.getElementById('t2').value) - m(document.getElementById('t1').value)) - (m(document.getElementById('l2').value) - m(document.getElementById('l1').value));
-        if(total < 0 || isNaN(total)) return alert("Check times!");
+        if(isNaN(total)) return alert("Preencha os horários!");
         let obj = { id: Date.now(), d, m: total, ot: Math.max(0, total-480), g: (total/60)*r };
         db = db.filter(x => x.d !== d); db.push(obj);
-        localStorage.setItem('db_isaque_v13', JSON.stringify(db));
+        localStorage.setItem('db_isaque_v14', JSON.stringify(db));
         localStorage.setItem('u_n', document.getElementById('uN').value);
         localStorage.setItem('u_c', document.getElementById('uC').value);
         localStorage.setItem('u_r', r);
-        desenhar(); alert("Saved!");
+        desenhar(); alert("Salvo!");
     }
 
     function desenhar() {
         let h = '';
         db.sort((a,b)=>b.d.localeCompare(a.d)).forEach(x => {
-            h += `<tr><td>${x.d}</td><td>${Math.floor(x.m/60)}h</td><td>$${x.g.toFixed(2)}</td><td><button onclick="del(${x.id})" style="border:none;background:none">❌</button></td></tr>`;
+            h += `<tr><td>${x.d}</td><td><b>${Math.floor(x.m/60)}h ${x.m%60}m</b></td><td>$${x.g.toFixed(2)}</td><td><button onclick="del(${x.id})" style="border:none;background:none">❌</button></td></tr>`;
         });
         document.getElementById('listaPonto').innerHTML = h;
     }
 
-    function del(id) { if(confirm("Delete?")) { db = db.filter(x=>x.id!==id); localStorage.setItem('db_isaque_v13', JSON.stringify(db)); desenhar(); } }
+    function del(id) { if(confirm("Apagar?")) { db = db.filter(x=>x.id!==id); localStorage.setItem('db_isaque_v14', JSON.stringify(db)); desenhar(); } }
 
     function exportarExcel() {
-        const rows = db.map(x => ({ Date: x.d, Hours: Math.floor(x.m/60)+":"+(x.m%60), Overtime: Math.floor(x.ot/60)+":"+(x.ot%60), Pay: x.g.toFixed(2) }));
+        const rows = db.map(x => ({ Data: x.d, Horas: Math.floor(x.m/60)+":"+(x.m%60), Total: x.g.toFixed(2) }));
         const ws = XLSX.utils.json_to_sheet(rows);
         const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
         XLSX.writeFile(wb, "Timesheet_Isaque.xlsx");
     }
 
-    function exportarPDF() {
+    async function exportarPDF() {
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
         const n = document.getElementById('uN').value, c = document.getElementById('uC').value;
         const totalG = db.reduce((a,b)=>a+b.g, 0);
 
-        // Header Design (Split)
-        doc.setFillColor(255, 255, 255); doc.rect(0, 0, 105, 60, 'F'); // Left White
-        doc.setFillColor(30, 41, 59); doc.rect(105, 0, 105, 60, 'F'); // Right Dark
+        // Topo Dividido
+        doc.setFillColor(255, 255, 255); doc.rect(0, 0, 105, 60, 'F');
+        doc.setFillColor(30, 41, 59); doc.rect(105, 0, 105, 60, 'F');
 
-        // Text Left
-        doc.setTextColor(30, 41, 59); doc.setFontSize(22); doc.setFont(undefined, 'bold'); doc.text(c || "COMPANY", 15, 25);
+        // Lado Esquerdo: Logo ou Nome
+        const logoUrl = document.getElementById('uLogo').value;
+        if(logoUrl) {
+            try { doc.addImage(logoUrl, 'PNG', 15, 10, 40, 40); } catch(e) { doc.setTextColor(30,41,59); doc.text(c, 15, 25); }
+        } else {
+            doc.setTextColor(30, 41, 59); doc.setFontSize(22); doc.setFont(undefined, 'bold'); doc.text(c || "EMPRESA", 15, 25);
+        }
         
-        // Text Right (Payment Details in Header)
-        doc.setTextColor(255, 255, 255); doc.setFontSize(24); doc.text("INVOICE", 120, 25);
+        // Lado Direito: Detalhes
+        doc.setTextColor(255, 255, 255); doc.setFontSize(24); doc.text("INVOICE", 120, 20);
         doc.setFontSize(8); doc.setFont(undefined, 'normal');
-        doc.text(`Bank: ${document.getElementById('bName').value}`, 120, 38);
-        doc.text(`Acc: ${document.getElementById('bAcc').value}`, 120, 43);
-        doc.text(`Swift: ${document.getElementById('bSwift').value}`, 120, 48);
-        doc.text(`PayPal: ${document.getElementById('bPaypal').value}`, 120, 53);
+        doc.text(`Invoice no: ${invNum}`, 120, 28);
+        doc.text(`Invoice Date: ${new Date().toLocaleDateString()}`, 120, 33);
+        doc.text(`Bank Name: ${document.getElementById('bName').value}`, 120, 43);
+        doc.text(`Acc Number: ${document.getElementById('bAcc').value}`, 120, 48);
+        doc.text(`Swift Code: ${document.getElementById('bSwift').value}`, 120, 53);
+        doc.text(`PayPal: ${document.getElementById('bPaypal').value}`, 120, 58);
 
-        // Addresses
+        // FROM e TO
         doc.setTextColor(30, 41, 59); doc.setFontSize(10); doc.setFont(undefined, 'bold');
         doc.text("FROM:", 15, 75); doc.setFont(undefined, 'normal'); doc.text(`${n}\n${document.getElementById('uAddr').value}`, 15, 82);
-        doc.setFont(undefined, 'bold'); doc.text("INVOICE TO:", 120, 75); doc.setFont(undefined, 'normal'); doc.text(`${c}\n${document.getElementById('cAddr').value}`, 120, 82);
+        doc.setFont(undefined, 'bold'); doc.text("INVOICE TO:", 120, 75); 
+        doc.setFont(undefined, 'normal'); doc.text(`${c}\n${document.getElementById('cAddr').value}`, 120, 82);
 
-        // Due Total Box
-        doc.setFillColor(235, 235, 235); doc.rect(15, 95, 60, 12, 'F');
-        doc.setFont(undefined, 'bold'); doc.text(`Due Total: $ ${totalG.toFixed(2)}`, 20, 103);
+        // Due Total
+        doc.setFillColor(235, 235, 235); doc.rect(15, 100, 60, 12, 'F');
+        doc.setFont(undefined, 'bold'); doc.text(`Due Total: $ ${totalG.toFixed(2)}`, 20, 108);
 
-        // Table
+        // Tabela
         doc.autoTable({
             head: [['Date', 'Hours', 'Overtime', 'Total']],
-            body: db.map(x=>[x.d, Math.floor(x.m/60)+":"+(x.m%60), Math.floor(x.ot/60)+":"+(x.ot%60), "$ "+x.g.toFixed(2)]),
-            startY: 115, theme: 'grid', headStyles: {fillColor: [30, 41, 59]}
+            body: db.map(x=>[x.d, Math.floor(x.m/60)+"h "+(x.m%60)+"m", Math.floor(x.ot/60)+"h", "$ "+x.g.toFixed(2)]),
+            startY: 120, theme: 'striped', headStyles: {fillColor: [30, 41, 59]}
         });
 
-        const finalY = doc.lastAutoTable.finalY + 20;
-        doc.setFontSize(7); doc.text("by Isaque", 15, finalY);
-        doc.setFontSize(10); doc.text("__________________________", 130, finalY + 10);
-        doc.text("Accounting Manager", 135, finalY + 16);
-        doc.setFontSize(8); doc.text("Developed & Powered By : Isaqueavlis", 80, 285);
+        // Bloco de Assinatura (Evita quebra de página)
+        const checkSpace = doc.lastAutoTable.finalY + 40;
+        if (checkSpace > 270) doc.addPage();
+        
+        const sigY = doc.lastAutoTable.finalY + 25;
+        doc.setDrawColor(200); doc.line(130, sigY, 190, sigY);
+        doc.setFontSize(10); doc.text("Accounting Manager", 135, sigY + 7);
+        
+        // Rodapé Fixo
+        doc.setFontSize(8); doc.setTextColor(150);
+        doc.text("Developed & Powered By : Isaqueavlis", 80, 290);
 
-        doc.save(`Invoice_${n}.pdf`);
+        // Salvar e Incrementar Invoice
+        invNum++;
+        localStorage.setItem('inv_num', invNum);
+        document.getElementById('iNext').value = invNum;
+        doc.save(`Invoice_${invNum-1}_${n}.pdf`);
     }
 
     window.onload = () => {
         document.getElementById('uN').value = localStorage.getItem('u_n') || '';
         document.getElementById('uC').value = localStorage.getItem('u_c') || '';
         document.getElementById('uR').value = localStorage.getItem('u_r') || '';
+        document.getElementById('uLogo').value = localStorage.getItem('u_logo') || '';
         document.getElementById('uAddr').value = localStorage.getItem('u_addr') || '';
         document.getElementById('cAddr').value = localStorage.getItem('c_addr') || '';
         document.getElementById('bName').value = localStorage.getItem('b_name') || '';
         document.getElementById('bAcc').value = localStorage.getItem('b_acc') || '';
         document.getElementById('bSwift').value = localStorage.getItem('b_swift') || '';
         document.getElementById('bPaypal').value = localStorage.getItem('b_paypal') || '';
-        
-        // Super Navigation Flow
+        document.getElementById('iNext').value = invNum;
+
         const inputs = document.querySelectorAll('.nav-f');
         inputs.forEach((inp, i) => {
             inp.addEventListener('keydown', e => {
